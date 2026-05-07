@@ -18,56 +18,31 @@ create table if not exists public.producto (
   descripcion text not null,
   linea_id bigint not null references public.linea_produccion (id),
   material_id bigint not null references public.material (id),
-  color text,
-  estado text not null default 'activo' check (estado in ('activo', 'inactivo')),
-  creado_en timestamptz not null default now(),
-  actualizado_en timestamptz not null default now()
+
+  estado text not null default 'activo' check (estado in ('activo', 'inactivo'))
 );
 
-create or replace function public.set_updated_at()
-returns trigger
-language plpgsql
-as $$
-begin
-  new.actualizado_en = now();
-  return new;
-end;
-$$;
-
-drop trigger if exists producto_set_updated_at on public.producto;
-create trigger producto_set_updated_at
-before update on public.producto
-for each row
-execute function public.set_updated_at();
-
--- Especificaciones de inyeccion (1:1 con producto)
-create table if not exists public.espec_inyeccion (
+-- Especificaciones de inyección (1:1 con producto), columnas text
+drop table if exists public.espec_inyeccion cascade;
+create table public.espec_inyeccion (
   id bigint generated always as identity primary key,
   producto_id bigint not null unique references public.producto (id) on delete cascade,
-  peso_g_nominal text,
-  peso_g_tolerancia text,
-  diam_exterior_mm_nominal text,
-  diam_exterior_mm_tolerancia text,
-  diam_interior_mm_nominal text,
-  diam_interior_mm_tolerancia text,
-  alto_largo_mm_nominal text,
-  alto_largo_mm_tolerancia text,
-  ancho_mm_nominal text,
-  ancho_mm_tolerancia text,
-  espesor_pared_mm_nominal text,
-  espesor_pared_mm_tolerancia text,
-  espesor_preco_mm_nominal text,
-  espesor_preco_mm_tolerancia text,
-  diam_ext_sin_hilo_mm_nominal text,
-  diam_ext_sin_hilo_mm_tolerancia text
+  peso text,
+  diam_exterior_mm text,
+  diam_ext_sin_hilo_mm text,
+  diam_interior_mm text,
+  alto_largo_mm text,
+  ancho_mm text,
+  espesor_pared_mm text,
+  espesor_preco_mm text
 );
 
--- Especificaciones de soplado (1:1 con producto)
-create table if not exists public.espec_soplado (
+-- Especificaciones de soplado (1:1 con producto), columnas text
+drop table if exists public.espec_soplado cascade;
+create table public.espec_soplado (
   id bigint generated always as identity primary key,
   producto_id bigint not null unique references public.producto (id) on delete cascade,
-  peso_g text,
-  peso_tolerancia text,
+  peso text,
   diam_ext_boca_mm text,
   diam_ext_cuello_mm text,
   diam_int_cuello_mm text,
@@ -109,6 +84,9 @@ create policy "producto_insert_auth"
 create policy "producto_update_auth"
   on public.producto for update
   using (auth.role() = 'authenticated');
+create policy "producto_delete_auth"
+  on public.producto for delete
+  using (auth.role() = 'authenticated');
 
 create policy "inyeccion_select_auth"
   on public.espec_inyeccion for select
@@ -119,6 +97,9 @@ create policy "inyeccion_insert_auth"
 create policy "inyeccion_update_auth"
   on public.espec_inyeccion for update
   using (auth.role() = 'authenticated');
+create policy "inyeccion_delete_auth"
+  on public.espec_inyeccion for delete
+  using (auth.role() = 'authenticated');
 
 create policy "soplado_select_auth"
   on public.espec_soplado for select
@@ -128,4 +109,7 @@ create policy "soplado_insert_auth"
   with check (auth.role() = 'authenticated');
 create policy "soplado_update_auth"
   on public.espec_soplado for update
+  using (auth.role() = 'authenticated');
+create policy "soplado_delete_auth"
+  on public.espec_soplado for delete
   using (auth.role() = 'authenticated');

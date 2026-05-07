@@ -11,27 +11,18 @@ export function ilikeContainsPattern(text: string): string {
 }
 
 const ETIQUETAS_INYECCION: Record<string, string> = {
-  peso_g_nominal: "Peso nominal (g)",
-  peso_g_tolerancia: "Peso tolerancia (g)",
-  diam_exterior_mm_nominal: "Diám. exterior nominal (mm)",
-  diam_exterior_mm_tolerancia: "Diám. exterior tolerancia (mm)",
-  diam_interior_mm_nominal: "Diám. interior nominal (mm)",
-  diam_interior_mm_tolerancia: "Diám. interior tolerancia (mm)",
-  alto_largo_mm_nominal: "Alto / largo nominal (mm)",
-  alto_largo_mm_tolerancia: "Alto / largo tolerancia (mm)",
-  ancho_mm_nominal: "Ancho nominal (mm)",
-  ancho_mm_tolerancia: "Ancho tolerancia (mm)",
-  espesor_pared_mm_nominal: "Espesor pared nominal (mm)",
-  espesor_pared_mm_tolerancia: "Espesor pared tolerancia (mm)",
-  espesor_preco_mm_nominal: "Espesor preco nominal (mm)",
-  espesor_preco_mm_tolerancia: "Espesor preco tolerancia (mm)",
-  diam_ext_sin_hilo_mm_nominal: "Diám. ext. sin hilo nominal (mm)",
-  diam_ext_sin_hilo_mm_tolerancia: "Diám. ext. sin hilo tolerancia (mm)",
+  peso: "Peso",
+  diam_exterior_mm: "Diám. exterior (mm)",
+  diam_ext_sin_hilo_mm: "Diám. ext. sin hilo (mm)",
+  diam_interior_mm: "Diám. interior (mm)",
+  alto_largo_mm: "Alto / largo (mm)",
+  ancho_mm: "Ancho (mm)",
+  espesor_pared_mm: "Espesor pared (mm)",
+  espesor_preco_mm: "Espesor preco (mm)",
 };
 
 const ETIQUETAS_SOPLADO: Record<string, string> = {
-  peso_g: "Peso (g)",
-  peso_tolerancia: "Peso tolerancia (g)",
+  peso: "Peso",
   diam_ext_boca_mm: "Diám. exterior boca (mm)",
   diam_ext_cuello_mm: "Diám. exterior cuello (mm)",
   diam_int_cuello_mm: "Diám. interior cuello (mm)",
@@ -89,11 +80,11 @@ export function getPreviewPesoDiametro(p: ProductoCard): { peso: string; diametr
   const kind = resolveSpecKind(p);
   if (kind === "inyeccion" && p.espec_inyeccion) {
     const e = p.espec_inyeccion;
-    const peso = formatValor(e.peso_g_nominal);
+    const peso = formatValor(e.peso);
     const diam =
-      formatValor(e.diam_exterior_mm_nominal) ??
-      formatValor(e.diam_interior_mm_nominal) ??
-      formatValor(e.diam_ext_sin_hilo_mm_nominal);
+      formatValor(e.diam_exterior_mm) ??
+      formatValor(e.diam_ext_sin_hilo_mm) ??
+      formatValor(e.diam_interior_mm);
     return {
       peso: peso ?? "—",
       diametro: diam ?? "—",
@@ -101,7 +92,7 @@ export function getPreviewPesoDiametro(p: ProductoCard): { peso: string; diametr
   }
   if (kind === "soplado" && p.espec_soplado) {
     const e = p.espec_soplado;
-    const peso = formatValor(e.peso_g);
+    const peso = formatValor(e.peso);
     const diam = formatValor(e.diam_ext_boca_mm) ?? formatValor(e.diam_ext_cuello_mm);
     return {
       peso: peso ?? "—",

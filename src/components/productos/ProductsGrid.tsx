@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import type { ProductoCard } from "@/lib/types/productos";
+import { DeleteProductButton } from "@/components/productos/DeleteProductButton";
 import { getDetallesSecciones, getPreviewPesoDiametro, resolveSpecKind } from "@/lib/productoSpecs";
 
 export function ProductsGrid({ products }: { products: ProductoCard[] }) {
@@ -63,15 +65,24 @@ export function ProductsGrid({ products }: { products: ProductoCard[] }) {
                   <p className="font-medium text-zinc-900 dark:text-zinc-100">{diametro}</p>
                 </div>
               </div>
-              <div className="mt-3 flex items-center justify-between gap-2">
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs text-zinc-500">Proceso: {procesoEtiqueta}</span>
-                <button
-                  type="button"
-                  onClick={() => setDetalle(p)}
-                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-900"
-                >
-                  Más detalles
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/productos/${p.id}/edit`}
+                    className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                  >
+                    Editar
+                  </Link>
+                  <DeleteProductButton productoId={p.id} />
+                  <button
+                    type="button"
+                    onClick={() => setDetalle(p)}
+                    className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                  >
+                    Más detalles
+                  </button>
+                </div>
               </div>
             </article>
           );

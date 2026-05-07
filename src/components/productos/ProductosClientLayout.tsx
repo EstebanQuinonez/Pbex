@@ -40,8 +40,8 @@ export function ProductosClientLayout({
           aria-label="Formulario de nuevo producto"
         >
           <p className="mb-6 text-sm text-zinc-600 dark:text-zinc-400">
-            Si necesitas una línea o material nuevo, créalos primero. Luego completa el producto y la especificación
-            según el tipo de línea (inyección o soplado).
+            Si necesitas una línea o material nuevo, créalos primero. Código, descripción, línea y material son obligatorios;
+            las medidas de la especificación son opcionales.
           </p>
           <div className="flex flex-col gap-8">
             <CatalogForms />
