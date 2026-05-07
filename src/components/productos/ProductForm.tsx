@@ -34,7 +34,7 @@ export function ProductForm({
 
   return (
     <form action={formAction} className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-      <h2 className="text-lg font-semibold">Nuevo producto</h2>
+      <h2 className="text-lg font-semibold">Datos del producto</h2>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Field label="Código" htmlFor="codigo">
           <Input id="codigo" name="codigo" placeholder="PT001082" required />
@@ -47,9 +47,6 @@ export function ProductForm({
         </Field>
         <Field label="Descripción" htmlFor="descripcion">
           <Input id="descripcion" name="descripcion" required />
-        </Field>
-        <Field label="Color (opcional)" htmlFor="color">
-          <Input id="color" name="color" />
         </Field>
         <Field label="Línea" htmlFor="linea_id">
           <select

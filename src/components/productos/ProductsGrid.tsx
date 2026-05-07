@@ -27,7 +27,6 @@ export function ProductsGrid({ products }: { products: ProductoCard[] }) {
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
               Línea: <strong>{p.linea?.nombre ?? "-"}</strong> · Material:{" "}
               <strong>{p.material?.abreviatura ?? "-"}</strong>
-              {p.color ? ` · Color: ${p.color}` : ""}
             </p>
             <div className="mt-3 text-xs text-zinc-500">
               Proceso: {isIny ? "Inyección" : "Soplado"}

@@ -21,7 +21,6 @@ const baseProductoSchema = z.object({
   descripcion: z.string().min(3, "Descripción requerida"),
   linea_id: z.coerce.number().int().positive("Selecciona línea"),
   material_id: z.coerce.number().int().positive("Selecciona material"),
-  color: z.string().optional(),
   estado: z.enum(["activo", "inactivo"]).default("activo"),
 });
 
@@ -112,7 +111,6 @@ export async function createProducto(
     descripcion: String(formData.get("descripcion") ?? "").trim(),
     linea_id: formData.get("linea_id"),
     material_id: formData.get("material_id"),
-    color: String(formData.get("color") ?? "").trim() || undefined,
     estado: String(formData.get("estado") ?? "activo"),
   });
   if (!base.success) return { error: base.error.issues[0]?.message ?? "Datos inválidos" };
@@ -131,7 +129,6 @@ export async function createProducto(
       descripcion: base.data.descripcion,
       linea_id: base.data.linea_id,
       material_id: base.data.material_id,
-      color: base.data.color ?? null,
       estado: base.data.estado,
     })
     .select("id")
