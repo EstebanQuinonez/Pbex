@@ -45,14 +45,19 @@ export default async function EditProductoPage({ params }: { params: Promise<{ i
 
   const { data: row, error } = await supabase
     .from("producto")
-    .select("id,codigo,descripcion,linea_id,material_id,estado,espec_inyeccion(*),espec_soplado(*)")
+    .select("id,codigo,descripcion,linea_id,material_id,estado")
     .eq("id", nid)
     .maybeSingle();
 
   if (error || !row) notFound();
 
-  const iny = firstEmbedded<Record<string, unknown>>(row.espec_inyeccion as never);
-  const sop = firstEmbedded<Record<string, unknown>>(row.espec_soplado as never);
+  const [{ data: inyRows }, { data: sopRows }] = await Promise.all([
+    supabase.from("espec_inyeccion").select("*").eq("producto_id", nid).limit(1),
+    supabase.from("espec_soplado").select("*").eq("producto_id", nid).limit(1),
+  ]);
+
+  const iny = firstEmbedded<Record<string, unknown>>(inyRows as never);
+  const sop = firstEmbedded<Record<string, unknown>>(sopRows as never);
 
   const defaults: ProductoEditDefaults = {
     id: row.id,

@@ -37,9 +37,9 @@ export default async function ProductosPage({
     .order("nombre", { ascending: true });
   const materiales: Material[] = (materialesRaw ?? []) as Material[];
 
-  let query = supabase.from("producto").select(
-    "id,codigo,descripcion,estado,linea:linea_produccion(id,nombre),material:material(id,nombre,abreviatura),espec_inyeccion(*),espec_soplado(*)",
-  );
+  let query = supabase
+    .from("producto")
+    .select("id,codigo,descripcion,estado,linea:linea_produccion(id,nombre),material:material(id,nombre,abreviatura)");
   if (lineaFiltro) query = query.eq("linea_id", lineaFiltro);
   if (materialFiltro) query = query.eq("material_id", materialFiltro);
 
@@ -50,6 +50,25 @@ export default async function ProductosPage({
 
   const { data: productsRaw } = await query.order("id", { ascending: false });
 
+  const productIds = (productsRaw ?? []).map((p: any) => p.id);
+  const [inyRes, sopRes] = await Promise.all([
+    productIds.length
+      ? supabase.from("espec_inyeccion").select("*").in("producto_id", productIds)
+      : Promise.resolve({ data: [], error: null } as any),
+    productIds.length
+      ? supabase.from("espec_soplado").select("*").in("producto_id", productIds)
+      : Promise.resolve({ data: [], error: null } as any),
+  ]);
+
+  const inyeccionByProductId = new Map<number, any>();
+  for (const row of inyRes.data ?? []) {
+    inyeccionByProductId.set(row.producto_id, row);
+  }
+  const sopladoByProductId = new Map<number, any>();
+  for (const row of sopRes.data ?? []) {
+    sopladoByProductId.set(row.producto_id, row);
+  }
+
   const products: ProductoCard[] = (productsRaw ?? []).map((row: any) => ({
     id: row.id,
     codigo: row.codigo,
@@ -57,8 +76,8 @@ export default async function ProductosPage({
     estado: row.estado,
     linea: firstEmbedded(row.linea),
     material: firstEmbedded(row.material),
-    espec_inyeccion: firstEmbedded(row.espec_inyeccion),
-    espec_soplado: firstEmbedded(row.espec_soplado),
+    espec_inyeccion: inyeccionByProductId.get(row.id) ?? null,
+    espec_soplado: sopladoByProductId.get(row.id) ?? null,
   }));
 
   return (

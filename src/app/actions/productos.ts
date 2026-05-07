@@ -96,6 +96,18 @@ function pickEspecSopladoUpdate(formData: FormData): Record<string, string | nul
   return out;
 }
 
+function nullsForInyeccion(): Record<string, null> {
+  const out: Record<string, null> = {};
+  for (const k of CAMPOS_INYECCION) out[k] = null;
+  return out;
+}
+
+function nullsForSoplado(): Record<string, null> {
+  const out: Record<string, null> = {};
+  for (const k of CAMPOS_SOPLADO) out[k] = null;
+  return out;
+}
+
 export async function createLinea(
   _prev: ProductActionState | undefined,
   formData: FormData,
@@ -236,24 +248,34 @@ export async function updateProducto(
     .eq("id", producto_id);
   if (updErr) return { error: updErr.message };
 
-  await supabase.from("espec_inyeccion").delete().eq("producto_id", producto_id);
-  await supabase.from("espec_soplado").delete().eq("producto_id", producto_id);
-
   const lineName = linea.nombre.toLowerCase();
   if (lineName.includes("inye")) {
     const espec = pickEspecInyeccionUpdate(formData);
-    const { error } = await supabase.from("espec_inyeccion").insert({
+    const { error } = await supabase.from("espec_inyeccion").upsert({
       producto_id,
       ...espec,
+    }, {
+      onConflict: "producto_id",
     });
     if (error) return { error: error.message };
+
+    // Limpia valores de la tabla opuesta sin depender de DELETE.
+    await supabase
+      .from("espec_soplado")
+      .upsert({ producto_id, ...nullsForSoplado() }, { onConflict: "producto_id" });
   } else {
     const espec = pickEspecSopladoUpdate(formData);
-    const { error } = await supabase.from("espec_soplado").insert({
+    const { error } = await supabase.from("espec_soplado").upsert({
       producto_id,
       ...espec,
+    }, {
+      onConflict: "producto_id",
     });
     if (error) return { error: error.message };
+
+    await supabase
+      .from("espec_inyeccion")
+      .upsert({ producto_id, ...nullsForInyeccion() }, { onConflict: "producto_id" });
   }
 
   revalidatePath("/productos");
@@ -269,9 +291,7 @@ export async function deleteProducto(formData: FormData) {
   }
 
   const { error } = await supabase.from("producto").delete().eq("id", id);
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) redirect(`/productos?error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/productos");
   redirect("/productos");
