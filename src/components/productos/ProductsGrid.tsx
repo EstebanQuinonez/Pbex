@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import type { ProductoCard } from "@/lib/types/productos";
-import { getDetallesEspecificacion, getPreviewPesoDiametro } from "@/lib/productoSpecs";
+import { getDetallesSecciones, getPreviewPesoDiametro, resolveSpecKind } from "@/lib/productoSpecs";
 
 export function ProductsGrid({ products }: { products: ProductoCard[] }) {
   const [detalle, setDetalle] = useState<ProductoCard | null>(null);
@@ -29,12 +29,14 @@ export function ProductsGrid({ products }: { products: ProductoCard[] }) {
     <>
       <div className="grid gap-4 md:grid-cols-2">
         {products.map((p) => {
-          const isIny = !!p.espec_inyeccion;
+          const kind = resolveSpecKind(p);
+          const procesoEtiqueta =
+            kind === "inyeccion" ? "Inyección" : kind === "soplado" ? "Soplado" : "Sin datos de proceso";
           const { peso, diametro } = getPreviewPesoDiametro(p);
           return (
             <article
               key={p.id}
-              className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+              className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-600 dark:hover:shadow-lg dark:hover:shadow-black/20"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -62,7 +64,7 @@ export function ProductsGrid({ products }: { products: ProductoCard[] }) {
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between gap-2">
-                <span className="text-xs text-zinc-500">Proceso: {isIny ? "Inyección" : "Soplado"}</span>
+                <span className="text-xs text-zinc-500">Proceso: {procesoEtiqueta}</span>
                 <button
                   type="button"
                   onClick={() => setDetalle(p)}
@@ -106,24 +108,38 @@ export function ProductsGrid({ products }: { products: ProductoCard[] }) {
               </button>
             </div>
             <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              {detalle.linea?.nombre ?? "—"} · {detalle.material?.abreviatura ?? "—"} ·{" "}
-              {detalle.espec_inyeccion ? "Inyección" : "Soplado"}
+              {detalle.linea?.nombre ?? "—"} · {detalle.material?.abreviatura ?? "—"}
             </p>
             <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
               {(() => {
-                const filas = getDetallesEspecificacion(detalle);
-                if (!filas.length) {
-                  return <p className="text-sm text-zinc-500">No hay especificaciones numéricas registradas.</p>;
+                const secciones = getDetallesSecciones(detalle);
+                if (!secciones.length) {
+                  return (
+                    <p className="text-sm text-zinc-500">
+                      No hay especificaciones con valores en la base de datos para este producto (o no se pudieron cargar las
+                      tablas relacionadas).
+                    </p>
+                  );
                 }
                 return (
-                  <dl className="space-y-2 text-sm">
-                    {filas.map((f) => (
-                      <div key={f.clave} className="flex justify-between gap-4 border-b border-zinc-100 py-2 last:border-0 dark:border-zinc-800/80">
-                        <dt className="text-zinc-600 dark:text-zinc-400">{f.etiqueta}</dt>
-                        <dd className="font-medium text-zinc-900 dark:text-zinc-100">{f.valor}</dd>
+                  <div className="space-y-6">
+                    {secciones.map((sec) => (
+                      <div key={sec.titulo}>
+                        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">{sec.titulo}</h3>
+                        <dl className="space-y-2 text-sm">
+                          {sec.filas.map((f) => (
+                            <div
+                              key={`${sec.titulo}-${f.clave}`}
+                              className="flex justify-between gap-4 border-b border-zinc-100 py-2 last:border-0 dark:border-zinc-800/80"
+                            >
+                              <dt className="text-zinc-600 dark:text-zinc-400">{f.etiqueta}</dt>
+                              <dd className="font-medium text-zinc-900 dark:text-zinc-100">{f.valor}</dd>
+                            </div>
+                          ))}
+                        </dl>
                       </div>
                     ))}
-                  </dl>
+                  </div>
                 );
               })()}
             </div>

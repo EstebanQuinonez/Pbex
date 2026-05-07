@@ -81,14 +81,10 @@ export function ProductosToolbar({
             name="busqueda"
             type="search"
             autoComplete="off"
-            placeholder="Código o descripción (cualquier parte)…"
             value={qInput}
             onChange={(e) => setQInput(e.target.value)}
             className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none ring-zinc-400 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-950 dark:focus:ring-zinc-800"
           />
-          <p className="mt-1 text-xs text-zinc-500">
-            Busca en código y descripción: coincide si el texto aparece en cualquier parte (sin distinguir mayúsculas).
-          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">

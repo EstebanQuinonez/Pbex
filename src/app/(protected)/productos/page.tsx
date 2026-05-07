@@ -7,6 +7,13 @@ import type { LineaProduccion, Material, ProductoCard } from "@/lib/types/produc
 
 type SearchParams = Promise<{ linea?: string; material?: string; q?: string }>;
 
+function firstEmbedded<T>(v: T | T[] | null | undefined): T | null {
+  if (v == null) return null;
+  if (Array.isArray(v)) return v[0] ?? null;
+  if (typeof v === "object" && Object.keys(v as object).length === 0) return null;
+  return v;
+}
+
 export default async function ProductosPage({
   searchParams,
 }: {
@@ -48,10 +55,10 @@ export default async function ProductosPage({
     codigo: row.codigo,
     descripcion: row.descripcion,
     estado: row.estado,
-    linea: Array.isArray(row.linea) ? row.linea[0] ?? null : row.linea,
-    material: Array.isArray(row.material) ? row.material[0] ?? null : row.material,
-    espec_inyeccion: Array.isArray(row.espec_inyeccion) ? row.espec_inyeccion[0] ?? null : row.espec_inyeccion,
-    espec_soplado: Array.isArray(row.espec_soplado) ? row.espec_soplado[0] ?? null : row.espec_soplado,
+    linea: firstEmbedded(row.linea),
+    material: firstEmbedded(row.material),
+    espec_inyeccion: firstEmbedded(row.espec_inyeccion),
+    espec_soplado: firstEmbedded(row.espec_soplado),
   }));
 
   return (
