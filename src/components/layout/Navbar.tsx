@@ -18,6 +18,9 @@ export function Navbar() {
           <Link className={linkClass} href="/registro">
             Registros
           </Link>
+          <Link className={linkClass} href="/productos">
+            Productos
+          </Link>
           <form action={signOut}>
             <button
               type="submit"
