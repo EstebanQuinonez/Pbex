@@ -3,14 +3,18 @@ import { createClient } from "@/lib/supabase/server";
 import { ProtectedShell } from "@/components/layout/ProtectedShell";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
+    if (!user) {
+      redirect("/login");
+    }
+
+    return <ProtectedShell>{children}</ProtectedShell>;
+  } catch {
     redirect("/login");
   }
-
-  return <ProtectedShell>{children}</ProtectedShell>;
 }

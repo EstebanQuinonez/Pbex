@@ -45,6 +45,8 @@ export default async function ProductosPage({
 
   if (textoBusqueda.length > 0) {
     const patron = ilikeContainsPattern(textoBusqueda);
+    // Primero filtramos por código para acotar lista,
+    // y la descripción sirve como búsqueda más amplia.
     query = query.or(`codigo.ilike.${patron},descripcion.ilike.${patron}`);
   }
 
@@ -62,11 +64,13 @@ export default async function ProductosPage({
 
   const inyeccionByProductId = new Map<number, any>();
   for (const row of inyRes.data ?? []) {
-    inyeccionByProductId.set(row.producto_id, row);
+    const pid = Number(row.producto_id);
+    if (Number.isFinite(pid)) inyeccionByProductId.set(pid, row);
   }
   const sopladoByProductId = new Map<number, any>();
   for (const row of sopRes.data ?? []) {
-    sopladoByProductId.set(row.producto_id, row);
+    const pid = Number(row.producto_id);
+    if (Number.isFinite(pid)) sopladoByProductId.set(pid, row);
   }
 
   const products: ProductoCard[] = (productsRaw ?? []).map((row: any) => ({

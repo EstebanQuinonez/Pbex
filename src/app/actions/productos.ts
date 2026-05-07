@@ -29,7 +29,7 @@ const updateProductoSchema = baseProductoSchema.extend({
   producto_id: z.coerce.number().int().positive(),
 });
 
-export const CAMPOS_INYECCION = [
+const CAMPOS_INYECCION = [
   "peso",
   "diam_exterior_mm",
   "diam_ext_sin_hilo_mm",
@@ -40,7 +40,7 @@ export const CAMPOS_INYECCION = [
   "espesor_preco_mm",
 ] as const;
 
-export const CAMPOS_SOPLADO = [
+const CAMPOS_SOPLADO = [
   "peso",
   "diam_ext_boca_mm",
   "diam_ext_cuello_mm",
@@ -280,7 +280,7 @@ export async function updateProducto(
 
   revalidatePath("/productos");
   revalidatePath(`/productos/${producto_id}/edit`);
-  redirect("/productos");
+  return { success: "Producto actualizado correctamente." };
 }
 
 export async function deleteProducto(formData: FormData) {

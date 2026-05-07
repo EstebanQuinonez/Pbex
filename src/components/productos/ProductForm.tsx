@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createProducto, updateProducto, type ProductActionState } from "@/app/actions/productos";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
@@ -44,6 +45,7 @@ export function ProductForm({
 }) {
   const serverAction = mode === "edit" ? updateProducto : createProducto;
   const [state, formAction, pending] = useActionState(serverAction, initial);
+  const router = useRouter();
 
   const [lineaId, setLineaId] = useState(() =>
     defaults ? String(defaults.linea_id) : lineas[0] ? String(lineas[0].id) : "",
@@ -61,6 +63,15 @@ export function ProductForm({
   const vSop = (k: string) => (sop?.[k] != null ? String(sop[k]) : "");
 
   const titulo = mode === "edit" ? "Editar datos del producto" : "Datos del producto";
+
+  // En edición, tras mostrar el mensaje de éxito, redirigimos a la lista al cabo de unos segundos.
+  useEffect(() => {
+    if (mode !== "edit" || !state?.success) return;
+    const id = setTimeout(() => {
+      router.push("/productos");
+    }, 1800);
+    return () => clearTimeout(id);
+  }, [mode, state?.success, router]);
 
   return (
     <form action={formAction} className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
@@ -149,7 +160,11 @@ export function ProductForm({
       </div>
 
       {state.error ? <p className="mt-3 text-sm text-red-600">{state.error}</p> : null}
-      {state.success && mode === "create" ? <p className="mt-3 text-sm text-emerald-600">{state.success}</p> : null}
+      {state.success ? (
+        <p className="mt-3 text-sm text-emerald-600">
+          {mode === "edit" ? state.success ?? "Cambios guardados." : state.success}
+        </p>
+      ) : null}
 
       <button
         type="submit"

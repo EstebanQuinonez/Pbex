@@ -26,10 +26,14 @@ export default async function EditProductoPage({ params }: { params: Promise<{ i
   if (!Number.isFinite(nid)) notFound();
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login");
+  } catch {
+    redirect("/login");
+  }
 
   const { data: lineasRaw } = await supabase
     .from("linea_produccion")

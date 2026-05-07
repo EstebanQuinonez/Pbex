@@ -19,20 +19,26 @@ export async function updateSession(request: NextRequest) {
         return request.cookies.getAll();
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value),
-        );
+        try {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        } catch {
+          // En algunos runtimes la request cookie store no es mutable.
+        }
         supabaseResponse = NextResponse.next({
           request,
         });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options),
-        );
+        cookiesToSet.forEach(({ name, value, options }) => {
+          supabaseResponse.cookies.set(name, value, options);
+        });
       },
     },
   });
 
-  await supabase.auth.getUser();
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // Evita romper el request completo por errores transitorios de auth.
+  }
 
   return supabaseResponse;
 }
