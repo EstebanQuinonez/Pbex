@@ -24,40 +24,57 @@ const baseProductoSchema = z.object({
   estado: z.enum(["activo", "inactivo"]).default("activo"),
 });
 
-const inyeccionSchema = z.object({
-  peso_g_nominal: z.coerce.number().optional(),
-  peso_g_tolerancia: z.coerce.number().optional(),
-  diam_exterior_mm_nominal: z.coerce.number().optional(),
-  diam_exterior_mm_tolerancia: z.coerce.number().optional(),
-  diam_interior_mm_nominal: z.coerce.number().optional(),
-  diam_interior_mm_tolerancia: z.coerce.number().optional(),
-  alto_largo_mm_nominal: z.coerce.number().optional(),
-  alto_largo_mm_tolerancia: z.coerce.number().optional(),
-  ancho_mm_nominal: z.coerce.number().optional(),
-  ancho_mm_tolerancia: z.coerce.number().optional(),
-  espesor_pared_mm_nominal: z.coerce.number().optional(),
-  espesor_pared_mm_tolerancia: z.coerce.number().optional(),
-  espesor_preco_mm_nominal: z.coerce.number().optional(),
-  espesor_preco_mm_tolerancia: z.coerce.number().optional(),
-  diam_ext_sin_hilo_mm_nominal: z.coerce.number().optional(),
-  diam_ext_sin_hilo_mm_tolerancia: z.coerce.number().optional(),
-});
+const CAMPOS_INYECCION = [
+  "peso_g_nominal",
+  "peso_g_tolerancia",
+  "diam_exterior_mm_nominal",
+  "diam_exterior_mm_tolerancia",
+  "diam_interior_mm_nominal",
+  "diam_interior_mm_tolerancia",
+  "alto_largo_mm_nominal",
+  "alto_largo_mm_tolerancia",
+  "ancho_mm_nominal",
+  "ancho_mm_tolerancia",
+  "espesor_pared_mm_nominal",
+  "espesor_pared_mm_tolerancia",
+  "espesor_preco_mm_nominal",
+  "espesor_preco_mm_tolerancia",
+  "diam_ext_sin_hilo_mm_nominal",
+  "diam_ext_sin_hilo_mm_tolerancia",
+] as const;
 
-const sopladoSchema = z.object({
-  peso_g: z.coerce.number().optional(),
-  peso_tolerancia: z.coerce.number().optional(),
-  diam_ext_boca_mm: z.coerce.number().optional(),
-  diam_ext_cuello_mm: z.coerce.number().optional(),
-  diam_int_cuello_mm: z.coerce.number().optional(),
-  altura_boca_mm: z.coerce.number().optional(),
-});
+const CAMPOS_SOPLADO = [
+  "peso_g",
+  "peso_tolerancia",
+  "diam_ext_boca_mm",
+  "diam_ext_cuello_mm",
+  "diam_int_cuello_mm",
+  "altura_boca_mm",
+] as const;
 
-function maybeNumber(value: FormDataEntryValue | null) {
+/** Valor de especificación como text en BD (vacío = no se envía el campo). */
+function maybeSpecText(value: FormDataEntryValue | null): string | undefined {
   if (value == null) return undefined;
-  const text = String(value).trim();
-  if (!text) return undefined;
-  const n = Number(text);
-  return Number.isFinite(n) ? n : undefined;
+  const t = String(value).trim();
+  return t === "" ? undefined : t;
+}
+
+function pickEspecInyeccion(formData: FormData): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of CAMPOS_INYECCION) {
+    const v = maybeSpecText(formData.get(k));
+    if (v !== undefined) out[k] = v;
+  }
+  return out;
+}
+
+function pickEspecSoplado(formData: FormData): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of CAMPOS_SOPLADO) {
+    const v = maybeSpecText(formData.get(k));
+    if (v !== undefined) out[k] = v;
+  }
+  return out;
 }
 
 export async function createLinea(
@@ -137,45 +154,17 @@ export async function createProducto(
 
   const lineName = linea.nombre.toLowerCase();
   if (lineName.includes("inye")) {
-    const parsedIny = inyeccionSchema.safeParse({
-      peso_g_nominal: maybeNumber(formData.get("peso_g_nominal")),
-      peso_g_tolerancia: maybeNumber(formData.get("peso_g_tolerancia")),
-      diam_exterior_mm_nominal: maybeNumber(formData.get("diam_exterior_mm_nominal")),
-      diam_exterior_mm_tolerancia: maybeNumber(formData.get("diam_exterior_mm_tolerancia")),
-      diam_interior_mm_nominal: maybeNumber(formData.get("diam_interior_mm_nominal")),
-      diam_interior_mm_tolerancia: maybeNumber(formData.get("diam_interior_mm_tolerancia")),
-      alto_largo_mm_nominal: maybeNumber(formData.get("alto_largo_mm_nominal")),
-      alto_largo_mm_tolerancia: maybeNumber(formData.get("alto_largo_mm_tolerancia")),
-      ancho_mm_nominal: maybeNumber(formData.get("ancho_mm_nominal")),
-      ancho_mm_tolerancia: maybeNumber(formData.get("ancho_mm_tolerancia")),
-      espesor_pared_mm_nominal: maybeNumber(formData.get("espesor_pared_mm_nominal")),
-      espesor_pared_mm_tolerancia: maybeNumber(formData.get("espesor_pared_mm_tolerancia")),
-      espesor_preco_mm_nominal: maybeNumber(formData.get("espesor_preco_mm_nominal")),
-      espesor_preco_mm_tolerancia: maybeNumber(formData.get("espesor_preco_mm_tolerancia")),
-      diam_ext_sin_hilo_mm_nominal: maybeNumber(formData.get("diam_ext_sin_hilo_mm_nominal")),
-      diam_ext_sin_hilo_mm_tolerancia: maybeNumber(formData.get("diam_ext_sin_hilo_mm_tolerancia")),
-    });
-    if (!parsedIny.success) return { error: parsedIny.error.issues[0]?.message ?? "Especificación inyección inválida" };
-
+    const espec = pickEspecInyeccion(formData);
     const { error } = await supabase.from("espec_inyeccion").insert({
       producto_id: producto.id,
-      ...parsedIny.data,
+      ...espec,
     });
     if (error) return { error: error.message };
   } else {
-    const parsedSop = sopladoSchema.safeParse({
-      peso_g: maybeNumber(formData.get("peso_g")),
-      peso_tolerancia: maybeNumber(formData.get("peso_tolerancia")),
-      diam_ext_boca_mm: maybeNumber(formData.get("diam_ext_boca_mm")),
-      diam_ext_cuello_mm: maybeNumber(formData.get("diam_ext_cuello_mm")),
-      diam_int_cuello_mm: maybeNumber(formData.get("diam_int_cuello_mm")),
-      altura_boca_mm: maybeNumber(formData.get("altura_boca_mm")),
-    });
-    if (!parsedSop.success) return { error: parsedSop.error.issues[0]?.message ?? "Especificación soplado inválida" };
-
+    const espec = pickEspecSoplado(formData);
     const { error } = await supabase.from("espec_soplado").insert({
       producto_id: producto.id,
-      ...parsedSop.data,
+      ...espec,
     });
     if (error) return { error: error.message };
   }

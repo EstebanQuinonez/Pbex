@@ -11,7 +11,7 @@ const initial: ProductActionState = {};
 function SpecInput({ name, label }: { name: string; label: string }) {
   return (
     <Field label={label} htmlFor={name}>
-      <Input id={name} name={name} type="number" step="0.001" />
+      <Input id={name} name={name} type="text" inputMode="decimal" autoComplete="off" />
     </Field>
   );
 }

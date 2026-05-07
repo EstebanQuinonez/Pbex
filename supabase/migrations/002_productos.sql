@@ -44,34 +44,34 @@ execute function public.set_updated_at();
 create table if not exists public.espec_inyeccion (
   id bigint generated always as identity primary key,
   producto_id bigint not null unique references public.producto (id) on delete cascade,
-  peso_g_nominal numeric(10,3),
-  peso_g_tolerancia numeric(10,3),
-  diam_exterior_mm_nominal numeric(10,3),
-  diam_exterior_mm_tolerancia numeric(10,3),
-  diam_interior_mm_nominal numeric(10,3),
-  diam_interior_mm_tolerancia numeric(10,3),
-  alto_largo_mm_nominal numeric(10,3),
-  alto_largo_mm_tolerancia numeric(10,3),
-  ancho_mm_nominal numeric(10,3),
-  ancho_mm_tolerancia numeric(10,3),
-  espesor_pared_mm_nominal numeric(10,3),
-  espesor_pared_mm_tolerancia numeric(10,3),
-  espesor_preco_mm_nominal numeric(10,3),
-  espesor_preco_mm_tolerancia numeric(10,3),
-  diam_ext_sin_hilo_mm_nominal numeric(10,3),
-  diam_ext_sin_hilo_mm_tolerancia numeric(10,3)
+  peso_g_nominal text,
+  peso_g_tolerancia text,
+  diam_exterior_mm_nominal text,
+  diam_exterior_mm_tolerancia text,
+  diam_interior_mm_nominal text,
+  diam_interior_mm_tolerancia text,
+  alto_largo_mm_nominal text,
+  alto_largo_mm_tolerancia text,
+  ancho_mm_nominal text,
+  ancho_mm_tolerancia text,
+  espesor_pared_mm_nominal text,
+  espesor_pared_mm_tolerancia text,
+  espesor_preco_mm_nominal text,
+  espesor_preco_mm_tolerancia text,
+  diam_ext_sin_hilo_mm_nominal text,
+  diam_ext_sin_hilo_mm_tolerancia text
 );
 
 -- Especificaciones de soplado (1:1 con producto)
 create table if not exists public.espec_soplado (
   id bigint generated always as identity primary key,
   producto_id bigint not null unique references public.producto (id) on delete cascade,
-  peso_g numeric(10,3),
-  peso_tolerancia numeric(10,3),
-  diam_ext_boca_mm numeric(10,3),
-  diam_ext_cuello_mm numeric(10,3),
-  diam_int_cuello_mm numeric(10,3),
-  altura_boca_mm numeric(10,3)
+  peso_g text,
+  peso_tolerancia text,
+  diam_ext_boca_mm text,
+  diam_ext_cuello_mm text,
+  diam_int_cuello_mm text,
+  altura_boca_mm text
 );
 
 -- Indices

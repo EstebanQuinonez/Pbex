@@ -17,6 +17,6 @@ export type ProductoCard = {
   estado: "activo" | "inactivo";
   linea: { id: number; nombre: string } | null;
   material: { id: number; nombre: string; abreviatura: string } | null;
-  espec_inyeccion: Record<string, number | null> | null;
-  espec_soplado: Record<string, number | null> | null;
+  espec_inyeccion: Record<string, string | number | null> | null;
+  espec_soplado: Record<string, string | number | null> | null;
 };

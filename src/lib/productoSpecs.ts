@@ -41,8 +41,7 @@ const ETIQUETAS_SOPLADO: Record<string, string> = {
 const SKIP_KEYS = new Set(["id", "producto_id"]);
 
 /**
- * Normaliza valores que vienen de PostgreSQL numeric / bigint / number / string.
- * PostgREST suele devolver numeric como string en JSON.
+ * Normaliza valores de especificación: columnas `text` en BD, o legacy number/numeric como string.
  */
 export function formatValor(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -51,7 +50,8 @@ export function formatValor(v: unknown): string | null {
   if (typeof v === "string") {
     const t = v.trim();
     if (t === "") return null;
-    if (/^-?\d+(\.\d+)?$/.test(t)) return trimNumericString(t);
+    const normalized = t.replace(",", ".");
+    if (/^-?\d+(\.\d+)?$/.test(normalized)) return trimNumericString(normalized);
     return t;
   }
   return null;
@@ -95,8 +95,8 @@ export function getPreviewPesoDiametro(p: ProductoCard): { peso: string; diametr
       formatValor(e.diam_interior_mm_nominal) ??
       formatValor(e.diam_ext_sin_hilo_mm_nominal);
     return {
-      peso: peso ? `${peso} g` : "—",
-      diametro: diam ? `${diam} mm` : "—",
+      peso: peso ?? "—",
+      diametro: diam ?? "—",
     };
   }
   if (kind === "soplado" && p.espec_soplado) {
@@ -104,8 +104,8 @@ export function getPreviewPesoDiametro(p: ProductoCard): { peso: string; diametr
     const peso = formatValor(e.peso_g);
     const diam = formatValor(e.diam_ext_boca_mm) ?? formatValor(e.diam_ext_cuello_mm);
     return {
-      peso: peso ? `${peso} g` : "—",
-      diametro: diam ? `${diam} mm` : "—",
+      peso: peso ?? "—",
+      diametro: diam ?? "—",
     };
   }
   return { peso: "—", diametro: "—" };
