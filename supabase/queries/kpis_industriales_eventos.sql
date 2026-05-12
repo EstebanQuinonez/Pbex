@@ -1,6 +1,8 @@
 -- =============================================================================
 -- KPIs industriales: public.eventos + catálogos (004) y producto/línea (002)
 -- Requisitos: migraciones 003 (eventos) y 004 (maquinas, defectos_producto, …)
+-- La función versionada para producción vive en: supabase/migrations/006_dashboard_rls_and_kpis.sql
+-- (incluye filtro p_turno, produccion_por_dia, merma_por_maquina y política RLS gerente/admin).
 --
 -- Uso — RPC:
 --   const { data } = await supabase.rpc('fn_kpis_eventos', {

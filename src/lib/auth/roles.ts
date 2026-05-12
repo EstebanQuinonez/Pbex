@@ -45,7 +45,7 @@ type RouteRule = { prefix: string; roles: readonly AppRole[] };
 const ROUTE_ROLE_RULES: RouteRule[] = [
   { prefix: "/admin", roles: ["ADMIN"] },
   { prefix: "/dashboard", roles: ["ADMIN", "GERENTE"] },
-  { prefix: "/registro", roles: ["ENCARGADO_LINEA"] },
+  { prefix: "/registro", roles: ["ENCARGADO_LINEA", "GERENTE", "ADMIN"] },
   { prefix: "/pedidos", roles: ["ADMIN", "VENTAS"] },
   { prefix: "/productos", roles: [] },
 ];

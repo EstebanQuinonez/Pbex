@@ -29,7 +29,13 @@ Aplicación web full-stack construida con Next.js (App Router) y TypeScript para
 
 ## Variables de entorno
 
-Crea `/.env.local` con:
+Plantilla versionada: **`.env.example`**. Cópiala a **`.env.local`** y rellena los valores (no subas `.env.local` a Git).
+
+```bash
+cp .env.example .env.local
+```
+
+Contenido mínimo (o edita `.env.local` directamente):
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co

@@ -22,9 +22,18 @@ function isDefectPayload(p: unknown): p is DefectPayload {
   );
 }
 
+function productionCantidadFromRow(row: EventoRow): number | null {
+  if (row.type !== EVENT_TYPES.PRODUCTION_RECORDED) return null;
+  const c = row.cantidad;
+  if (c != null && Number(c) > 0) return Number(c);
+  if (isProductionPayload(row.payload)) return row.payload.produccion_total;
+  return null;
+}
+
 export type ProductionMetrics = {
   registros: number;
   produccionTotal: number;
+  mermaTotalUnidades: number;
   promedioDesperdicioPct: number;
   /** Eficiencia material aproximada: 100% − desperdicio medio (0–100). */
   eficienciaPct: number;
@@ -46,28 +55,19 @@ export type AnalyticsResult = {
 
 const HIGH_WASTE_THRESHOLD = 5;
 const DEFECT_SPIKE_RATIO = 1.6;
+const MERMA_ALERTA_UNIDADES = 5;
 
-function parseEvents(rows: EventoRow[]) {
-  const production: ProductionPayload[] = [];
+function parseDefects(rows: EventoRow[]) {
   const defects: DefectPayload[] = [];
-
   for (const row of rows) {
-    if (row.type === EVENT_TYPES.PRODUCTION_RECORDED && isProductionPayload(row.payload)) {
-      production.push(row.payload);
-    }
     if (row.type === EVENT_TYPES.DEFECT_RECORDED && isDefectPayload(row.payload)) {
       defects.push(row.payload);
     }
   }
-
-  return { production, defects };
+  return defects;
 }
 
-function defectTotalsByDay(
-  rows: EventoRow[],
-  start: Date,
-  end: Date,
-): number {
+function defectTotalsByDay(rows: EventoRow[], start: Date, end: Date): number {
   let sum = 0;
   for (const row of rows) {
     if (row.type !== EVENT_TYPES.DEFECT_RECORDED || !isDefectPayload(row.payload)) continue;
@@ -78,20 +78,45 @@ function defectTotalsByDay(
 }
 
 export function computeAnalytics(rows: EventoRow[]): AnalyticsResult {
-  const { production, defects } = parseEvents(rows);
+  let produccionTotal = 0;
+  let registrosProd = 0;
+  const legacyWastes: number[] = [];
+  let mermaTotal = 0;
+  let alertasDesperdicioAlto = 0;
 
-  const produccionTotal = production.reduce((a, p) => a + p.produccion_total, 0);
+  for (const row of rows) {
+    if (row.type === EVENT_TYPES.PRODUCTION_RECORDED) {
+      const q = productionCantidadFromRow(row);
+      if (q != null && q > 0) {
+        produccionTotal += q;
+        registrosProd += 1;
+        if (isProductionPayload(row.payload)) {
+          legacyWastes.push(row.payload.porcentaje_desperdicio);
+          if (row.payload.porcentaje_desperdicio > HIGH_WASTE_THRESHOLD) {
+            alertasDesperdicioAlto += 1;
+          }
+        }
+      }
+    }
+    if (row.type === EVENT_TYPES.MERMA_RECORDED) {
+      const m = row.merma != null ? Number(row.merma) : 0;
+      if (m > 0) {
+        mermaTotal += m;
+        if (m >= MERMA_ALERTA_UNIDADES) alertasDesperdicioAlto += 1;
+      }
+    }
+  }
+
+  const promedioLegacy =
+    legacyWastes.length > 0 ? legacyWastes.reduce((a, b) => a + b, 0) / legacyWastes.length : null;
+  const pctMermaSobreProduccion =
+    produccionTotal > 0 ? (mermaTotal / produccionTotal) * 100 : 0;
   const promedioDesperdicioPct =
-    production.length === 0
-      ? 0
-      : production.reduce((a, p) => a + p.porcentaje_desperdicio, 0) / production.length;
+    promedioLegacy != null ? promedioLegacy : pctMermaSobreProduccion;
 
   const eficienciaPct = Math.max(0, Math.min(100, 100 - promedioDesperdicioPct));
 
-  const alertasDesperdicioAlto = production.filter(
-    (p) => p.porcentaje_desperdicio > HIGH_WASTE_THRESHOLD,
-  ).length;
-
+  const defects = parseDefects(rows);
   const porMaquina: Record<string, number> = {};
   const porTipo: Record<string, number> = {};
   let totalDefectos = 0;
@@ -107,15 +132,14 @@ export function computeAnalytics(rows: EventoRow[]): AnalyticsResult {
   const prevStart = new Date(now.getTime() - 2 * seven);
   const recent = defectTotalsByDay(rows, recentStart, now);
   const previous = defectTotalsByDay(rows, prevStart, recentStart);
-  const ratioRecienteVsAnterior =
-    previous > 0 ? recent / previous : recent > 0 ? null : null;
-  const aumentoAnormal =
-    previous > 0 && recent / previous >= DEFECT_SPIKE_RATIO && recent >= 3;
+  const ratioRecienteVsAnterior = previous > 0 ? recent / previous : recent > 0 ? null : null;
+  const aumentoAnormal = previous > 0 && recent / previous >= DEFECT_SPIKE_RATIO && recent >= 3;
 
   return {
     production: {
-      registros: production.length,
+      registros: registrosProd,
       produccionTotal,
+      mermaTotalUnidades: mermaTotal,
       promedioDesperdicioPct,
       eficienciaPct,
       alertasDesperdicioAlto,
@@ -147,13 +171,12 @@ export function buildSummaryForGroq(analytics: AnalyticsResult): string {
   return [
     "Resumen de planta (últimos datos registrados):",
     `- Registros de producción: ${p.registros}, volumen total: ${p.produccionTotal}`,
-    `- Desperdicio medio: ${p.promedioDesperdicioPct.toFixed(2)}%, eficiencia estimada: ${p.eficienciaPct.toFixed(2)}%`,
-    `- Registros con desperdicio >5%: ${p.alertasDesperdicioAlto}`,
+    `- Merma total (eventos MERMA_RECORDED): ${p.mermaTotalUnidades}`,
+    `- Desperdicio / merma indicador: ${p.promedioDesperdicioPct.toFixed(2)}%, eficiencia estimada: ${p.eficienciaPct.toFixed(2)}%`,
+    `- Alertas (desperdicio legacy >5% o merma ≥${MERMA_ALERTA_UNIDADES} u.): ${p.alertasDesperdicioAlto}`,
     `- Defectos totales (unidades): ${d.totalDefectos}`,
     `- Aumento anormal de defectos (7d vs 7d previos): ${d.aumentoAnormal ? "sí" : "no"}${
-      d.ratioRecienteVsAnterior != null
-        ? `, ratio ${d.ratioRecienteVsAnterior.toFixed(2)}`
-        : ""
+      d.ratioRecienteVsAnterior != null ? `, ratio ${d.ratioRecienteVsAnterior.toFixed(2)}` : ""
     }`,
     topMaquinas ? `- Top máquinas por defectos: ${topMaquinas}` : "",
     topTipos ? `- Top tipos de defecto: ${topTipos}` : "",

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { parseAppRole } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 import { fetchGroqRecommendations } from "@/services/groqService";
 
 const bodySchema = z.object({
   summary: z.string().min(10, "Resumen demasiado corto"),
+  structuredContext: z.record(z.string(), z.unknown()).optional(),
 });
 
 export async function POST(request: Request) {
@@ -15,6 +17,11 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const role = parseAppRole(user);
+  if (role !== "GERENTE" && role !== "ADMIN") {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
   let json: unknown;
@@ -30,7 +37,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const recommendations = await fetchGroqRecommendations(parsed.data.summary);
+    const recommendations = await fetchGroqRecommendations({
+      summary: parsed.data.summary,
+      structuredContext: parsed.data.structuredContext,
+    });
     return NextResponse.json({ recommendations });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Error al llamar a Groq";

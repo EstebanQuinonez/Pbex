@@ -1,15 +1,15 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { submitProduction, type ActionState } from "@/app/actions/events";
+import { submitMerma, type ActionState } from "@/app/actions/events";
 import type { RegistroCatalogs } from "@/lib/types/registro-catalog";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 
 const initial: ActionState = {};
 
-export function ProductionForm({ catalogs }: { catalogs: RegistroCatalogs }) {
-  const [state, formAction, pending] = useActionState(submitProduction, initial);
+export function MermaForm({ catalogs }: { catalogs: RegistroCatalogs }) {
+  const [state, formAction, pending] = useActionState(submitMerma, initial);
   const [productoId, setProductoId] = useState("");
   const [turno, setTurno] = useState("");
 
@@ -24,40 +24,25 @@ export function ProductionForm({ catalogs }: { catalogs: RegistroCatalogs }) {
     [catalogs.maquinas, lineaId],
   );
 
-  const encargadosFiltrados = useMemo(
-    () =>
-      lineaId == null || turno === ""
-        ? []
-        : catalogs.encargados.filter((e) => e.linea_id === lineaId && e.turno === turno),
-    [catalogs.encargados, lineaId, turno],
-  );
-
-  const operariosFiltrados = useMemo(
-    () => (turno === "" ? [] : catalogs.operarios.filter((o) => o.turno === turno)),
-    [catalogs.operarios, turno],
-  );
-
   return (
     <form
       action={formAction}
       className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
     >
       <div>
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Producción</h2>
+        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Merma</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Evento <code className="text-xs">PRODUCTION_RECORDED</code> con columnas enlazadas a catálogos.
+          Evento <code className="text-xs">MERMA_RECORDED</code> con unidades desperdiciadas.
         </p>
       </div>
 
-      <Field label="Producto" htmlFor="producto_id">
+      <Field label="Producto" htmlFor="merma-producto_id">
         <select
-          id="producto_id"
+          id="merma-producto_id"
           name="producto_id"
           required
           value={productoId}
-          onChange={(e) => {
-            setProductoId(e.target.value);
-          }}
+          onChange={(e) => setProductoId(e.target.value)}
           className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
         >
           <option value="">Selecciona…</option>
@@ -69,9 +54,9 @@ export function ProductionForm({ catalogs }: { catalogs: RegistroCatalogs }) {
         </select>
       </Field>
 
-      <Field label="Turno" htmlFor="turno">
+      <Field label="Turno" htmlFor="merma-turno">
         <select
-          id="turno"
+          id="merma-turno"
           name="turno"
           required
           value={turno}
@@ -84,9 +69,9 @@ export function ProductionForm({ catalogs }: { catalogs: RegistroCatalogs }) {
         </select>
       </Field>
 
-      <Field label="Máquina (misma línea que el producto)" htmlFor="maquina_id">
+      <Field label="Máquina" htmlFor="merma-maquina_id">
         <select
-          id="maquina_id"
+          id="merma-maquina_id"
           name="maquina_id"
           required
           disabled={maquinasFiltradas.length === 0}
@@ -101,42 +86,8 @@ export function ProductionForm({ catalogs }: { catalogs: RegistroCatalogs }) {
         </select>
       </Field>
 
-      <Field label="Encargado de línea (misma línea y turno)" htmlFor="encargado_id">
-        <select
-          id="encargado_id"
-          name="encargado_id"
-          required
-          disabled={encargadosFiltrados.length === 0}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-        >
-          <option value="">{turno === "" ? "Elige turno" : "Selecciona encargado…"}</option>
-          {encargadosFiltrados.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.nombre}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label="Operario (mismo turno)" htmlFor="operario_id">
-        <select
-          id="operario_id"
-          name="operario_id"
-          required
-          disabled={operariosFiltrados.length === 0}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-        >
-          <option value="">{turno === "" ? "Elige turno" : "Selecciona operario…"}</option>
-          {operariosFiltrados.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.nombre}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label="Cantidad producida (unidades)" htmlFor="cantidad">
-        <Input id="cantidad" name="cantidad" type="number" min="0" step="0.01" required />
+      <Field label="Merma (unidades)" htmlFor="merma">
+        <Input id="merma" name="merma" type="number" min="0" step="0.01" required />
       </Field>
 
       {state.error ? (
@@ -155,7 +106,7 @@ export function ProductionForm({ catalogs }: { catalogs: RegistroCatalogs }) {
         disabled={pending}
         className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
       >
-        {pending ? "Guardando…" : "Registrar producción"}
+        {pending ? "Guardando…" : "Registrar merma"}
       </button>
     </form>
   );

@@ -30,11 +30,11 @@ export type EventoRow = {
   timestamp: string;
   producto_id?: number | null;
   maquina_id?: number | null;
-  operario_id?: string | null;
-  encargado_id?: string | null;
+  operario_id?: number | null;
+  encargado_id?: number | null;
   cliente_id?: number | null;
   pedido_id?: number | null;
-  vendedor_id?: string | null;
+  vendedor_id?: number | null;
   turno?: string | null;
   cantidad?: number | null;
   merma?: number | null;
