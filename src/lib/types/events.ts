@@ -1,6 +1,10 @@
 export const EVENT_TYPES = {
   PRODUCTION_RECORDED: "PRODUCTION_RECORDED",
+  MERMA_RECORDED: "MERMA_RECORDED",
   DEFECT_RECORDED: "DEFECT_RECORDED",
+  MACHINE_FAILURE_RECORDED: "MACHINE_FAILURE_RECORDED",
+  ORDER_CREATED: "ORDER_CREATED",
+  ORDER_COMPLETED: "ORDER_COMPLETED",
 } as const;
 
 export type EventType = (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES];
@@ -21,7 +25,19 @@ export type DefectPayload = {
 export type EventoRow = {
   id: string;
   user_id: string;
-  tipo: EventType;
-  payload: ProductionPayload | DefectPayload;
-  created_at: string;
+  type: EventType;
+  payload: ProductionPayload | DefectPayload | Record<string, unknown>;
+  timestamp: string;
+  producto_id?: number | null;
+  maquina_id?: number | null;
+  operario_id?: string | null;
+  encargado_id?: string | null;
+  cliente_id?: number | null;
+  pedido_id?: number | null;
+  vendedor_id?: string | null;
+  turno?: string | null;
+  cantidad?: number | null;
+  merma?: number | null;
+  defecto?: string | null;
+  falla_maquina?: string | null;
 };

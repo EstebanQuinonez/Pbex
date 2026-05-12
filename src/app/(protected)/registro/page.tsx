@@ -9,7 +9,8 @@ export default function RegistroPage() {
           Registros de planta
         </h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Cada envío crea una fila en <code className="text-xs">eventos</code> con tipo y carga útil JSON.
+          Cada envío crea una fila en <code className="text-xs">eventos</code> con <code className="text-xs">type</code>{" "}
+          y carga útil JSON.
         </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-2">

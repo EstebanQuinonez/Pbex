@@ -8,11 +8,12 @@ import { Input } from "@/components/ui/Input";
 
 const initial: AuthFormState = {};
 
-export function LoginForm() {
+export function LoginForm({ nextPath }: { nextPath?: string | null }) {
   const [state, formAction, pending] = useActionState(signIn, initial);
 
   return (
     <form action={formAction} className="flex w-full max-w-sm flex-col gap-4">
+      {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
       <Field label="Correo" htmlFor="email">
         <Input id="email" name="email" type="email" autoComplete="email" required />
       </Field>

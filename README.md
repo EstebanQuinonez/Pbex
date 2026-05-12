@@ -35,12 +35,35 @@ Crea `/.env.local` con:
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_clave_publica
 GROQ_API_KEY=tu_groq_api_key
+# Solo servidor: panel /admin (listar/crear usuarios y roles). Nunca la expongas al cliente.
+SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
+# Opcional, solo para el script seed:admin
+BOOTSTRAP_ADMIN_EMAIL=admin@tuempresa.com
+BOOTSTRAP_ADMIN_PASSWORD=una_clave_segura
 ```
+
+### Primer administrador y gestión de usuarios
+
+1. En Supabase: **Settings → API → service_role** (secreta).
+2. Pon `SUPABASE_SERVICE_ROLE_KEY` en `.env.local` y reinicia `npm run dev`.
+3. **Opción A — script (recomendado la primera vez)**  
+   Define `BOOTSTRAP_ADMIN_EMAIL` y `BOOTSTRAP_ADMIN_PASSWORD` en `.env.local` y ejecuta (Node 20+):
+
+   ```bash
+   npm run seed:admin
+   ```
+
+   Crea el usuario con `user_metadata.app_role = ADMIN` o, si el correo ya existe, lo deja en ADMIN y actualiza la contraseña.
+
+4. **Opción B — a mano**  
+   Crea el usuario en **Authentication → Users** y en **User metadata** añade: `{ "app_role": "ADMIN" }`.
+
+5. Inicia sesión con ese usuario y abre **`/admin`**: desde ahí puedes **crear usuarios** y **cambiar roles** (`GERENTE`, `ENCARGADO_LINEA`, `VENTAS`, `ADMIN`) sin volver al dashboard de Supabase.
 
 ## Configuración de Supabase
 
 1. Crea un proyecto en Supabase.
-2. Ejecuta el SQL de `supabase/migrations/001_eventos.sql` en SQL Editor.
+2. Ejecuta en SQL Editor, en orden: `supabase/migrations/001_eventos.sql`, `002_productos.sql` y `003_eventos_event_sourcing.sql` (este último renombra `tipo`→`type`, `created_at`→`timestamp` y amplía `eventos`).
 3. Habilita Email/Password en Authentication.
 4. Configura `Site URL` y `Redirect URLs`:
    - Local: `http://localhost:3000`
@@ -66,7 +89,6 @@ Abrir [http://localhost:3000](http://localhost:3000).
 
 ## Notas
 
-- Los datos de producción y defectos se guardan como eventos:
-  - `PRODUCTION_RECORDED`
-  - `DEFECT_RECORDED`
+- Los datos de producción y defectos se guardan como eventos (`type`):
+  - `PRODUCTION_RECORDED`, `MERMA_RECORDED`, `DEFECT_RECORDED`, `MACHINE_FAILURE_RECORDED`, `ORDER_CREATED`, `ORDER_COMPLETED`
 - Si quieres subir imágenes a la nube, la ruta recomendada es Supabase Storage (bucket + políticas RLS).

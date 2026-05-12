@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { homePathForRole, parseAppRole } from "@/lib/auth/roles";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -9,7 +10,7 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/dashboard");
+    redirect(homePathForRole(parseAppRole(user)));
   }
 
   return (

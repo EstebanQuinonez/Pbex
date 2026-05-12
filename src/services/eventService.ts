@@ -8,7 +8,7 @@ export async function insertProductionEvent(
 ) {
   return supabase.from("eventos").insert({
     user_id: userId,
-    tipo: "PRODUCTION_RECORDED" satisfies EventType,
+    type: "PRODUCTION_RECORDED" satisfies EventType,
     payload,
   });
 }
@@ -20,7 +20,7 @@ export async function insertDefectEvent(
 ) {
   return supabase.from("eventos").insert({
     user_id: userId,
-    tipo: "DEFECT_RECORDED" satisfies EventType,
+    type: "DEFECT_RECORDED" satisfies EventType,
     payload,
   });
 }

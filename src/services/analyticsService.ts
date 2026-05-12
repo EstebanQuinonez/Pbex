@@ -52,10 +52,10 @@ function parseEvents(rows: EventoRow[]) {
   const defects: DefectPayload[] = [];
 
   for (const row of rows) {
-    if (row.tipo === EVENT_TYPES.PRODUCTION_RECORDED && isProductionPayload(row.payload)) {
+    if (row.type === EVENT_TYPES.PRODUCTION_RECORDED && isProductionPayload(row.payload)) {
       production.push(row.payload);
     }
-    if (row.tipo === EVENT_TYPES.DEFECT_RECORDED && isDefectPayload(row.payload)) {
+    if (row.type === EVENT_TYPES.DEFECT_RECORDED && isDefectPayload(row.payload)) {
       defects.push(row.payload);
     }
   }
@@ -70,8 +70,8 @@ function defectTotalsByDay(
 ): number {
   let sum = 0;
   for (const row of rows) {
-    if (row.tipo !== EVENT_TYPES.DEFECT_RECORDED || !isDefectPayload(row.payload)) continue;
-    const d = new Date(row.created_at);
+    if (row.type !== EVENT_TYPES.DEFECT_RECORDED || !isDefectPayload(row.payload)) continue;
+    const d = new Date(row.timestamp);
     if (d >= start && d < end) sum += row.payload.cantidad;
   }
   return sum;

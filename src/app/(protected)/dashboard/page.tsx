@@ -8,15 +8,29 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("eventos")
-    .select("id,user_id,tipo,payload,created_at")
-    .order("created_at", { ascending: false });
+    .select(
+      'id,user_id,type,payload,"timestamp",producto_id,maquina_id,operario_id,encargado_id,cliente_id,pedido_id,vendedor_id,turno,cantidad,merma,defecto,falla_maquina',
+    )
+    .order('"timestamp"', { ascending: false });
 
   const rows: EventoRow[] = (data ?? []).map((row) => ({
     id: row.id,
     user_id: row.user_id,
-    tipo: row.tipo as EventoRow["tipo"],
+    type: row.type as EventoRow["type"],
     payload: row.payload as EventoRow["payload"],
-    created_at: row.created_at,
+    timestamp: row.timestamp,
+    producto_id: row.producto_id,
+    maquina_id: row.maquina_id,
+    operario_id: row.operario_id,
+    encargado_id: row.encargado_id,
+    cliente_id: row.cliente_id,
+    pedido_id: row.pedido_id,
+    vendedor_id: row.vendedor_id,
+    turno: row.turno,
+    cantidad: row.cantidad,
+    merma: row.merma,
+    defecto: row.defecto,
+    falla_maquina: row.falla_maquina,
   }));
 
   const analytics = computeAnalytics(rows);

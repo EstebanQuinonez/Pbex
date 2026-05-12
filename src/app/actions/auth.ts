@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { parseAppRole, resolvePostLoginRedirect } from "@/lib/auth/roles";
 
 export type AuthFormState = { error?: string; success?: string };
 
@@ -12,15 +13,17 @@ export async function signIn(
 ): Promise<AuthFormState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const nextRaw = String(formData.get("next") ?? "").trim() || null;
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     return { error: error.message };
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  const role = parseAppRole(data.user);
+  redirect(resolvePostLoginRedirect(nextRaw, role));
 }
 
 export async function signUp(

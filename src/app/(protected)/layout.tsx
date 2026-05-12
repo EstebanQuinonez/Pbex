@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProtectedShell } from "@/components/layout/ProtectedShell";
+import { parseAppRole } from "@/lib/auth/roles";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   try {
@@ -13,7 +14,9 @@ export default async function ProtectedLayout({ children }: { children: React.Re
       redirect("/login");
     }
 
-    return <ProtectedShell>{children}</ProtectedShell>;
+    const role = parseAppRole(user);
+
+    return <ProtectedShell role={role}>{children}</ProtectedShell>;
   } catch {
     redirect("/login");
   }
