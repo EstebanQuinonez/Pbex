@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
+import { getServerAuth } from "@/lib/auth/server-auth";
+import { canManageProductosCatalog } from "@/lib/auth/action-roles";
 import { ProductosClientLayout } from "@/components/productos/ProductosClientLayout";
 import { ProductosToolbar } from "@/components/productos/ProductosToolbar";
 import { ProductsGrid } from "@/components/productos/ProductsGrid";
 import { ilikeContainsPattern } from "@/lib/productoSpecs";
 import type { LineaProduccion, Material, ProductoCard } from "@/lib/types/productos";
 
-type SearchParams = Promise<{ linea?: string; material?: string; q?: string }>;
+type SearchParams = Promise<{ linea?: string; material?: string; q?: string; error?: string | string[] }>;
 
 function firstEmbedded<T>(v: T | T[] | null | undefined): T | null {
   if (v == null) return null;
@@ -20,7 +22,16 @@ export default async function ProductosPage({
   searchParams: SearchParams;
 }) {
   const supabase = await createClient();
+  const { role } = await getServerAuth();
+  const canManageProducts = canManageProductosCatalog(role);
   const params = await searchParams;
+  const errorRaw = params.error;
+  const flashError =
+    typeof errorRaw === "string"
+      ? decodeURIComponent(errorRaw)
+      : Array.isArray(errorRaw) && errorRaw[0]
+        ? decodeURIComponent(errorRaw[0])
+        : null;
   const lineaFiltro = params.linea ? Number(params.linea) : undefined;
   const materialFiltro = params.material ? Number(params.material) : undefined;
   const textoBusqueda = (params.q ?? "").trim().replace(/,/g, " ");
@@ -85,10 +96,15 @@ export default async function ProductosPage({
   }));
 
   return (
-    <ProductosClientLayout lineas={lineas} materiales={materiales}>
+    <ProductosClientLayout
+      lineas={lineas}
+      materiales={materiales}
+      canManageProducts={canManageProducts}
+      flashError={flashError}
+    >
       <ProductosToolbar lineas={lineas} materiales={materiales} />
 
-      <ProductsGrid products={products} />
+      <ProductsGrid products={products} canManageProducts={canManageProducts} />
     </ProductosClientLayout>
   );
 }

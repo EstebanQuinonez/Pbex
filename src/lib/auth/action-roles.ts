@@ -9,3 +9,8 @@ export function canRecordPlantEvents(role: AppRole | null): boolean {
 export function canManagePedidoEvents(role: AppRole | null): boolean {
   return role === "VENTAS" || role === "ADMIN";
 }
+
+/** Catálogo de productos (alta, edición, baja y líneas/materiales desde esa pantalla). */
+export function canManageProductosCatalog(role: AppRole | null): boolean {
+  return role === "ADMIN";
+}

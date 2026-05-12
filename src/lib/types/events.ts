@@ -40,4 +40,6 @@ export type EventoRow = {
   merma?: number | null;
   defecto?: string | null;
   falla_maquina?: string | null;
+  /** MERMA_RECORDED → evento PRODUCTION_RECORDED padre. */
+  produccion_evento_id?: string | null;
 };

@@ -4,8 +4,25 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { parseAppRole } from "@/lib/auth/roles";
+import { canManageProductosCatalog } from "@/lib/auth/action-roles";
 
 export type ProductActionState = { error?: string; success?: string };
+
+async function requireAdminCatalog(): Promise<
+  | { supabase: Awaited<ReturnType<typeof createClient>>; error: null }
+  | { supabase: Awaited<ReturnType<typeof createClient>>; error: string }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { supabase, error: "Debes iniciar sesión." };
+  if (!canManageProductosCatalog(parseAppRole(user))) {
+    return { supabase, error: "Solo el administrador puede crear, modificar o eliminar productos." };
+  }
+  return { supabase, error: null };
+}
 
 const lineaSchema = z.object({
   nombre: z.string().min(2, "Nombre requerido"),
@@ -112,7 +129,9 @@ export async function createLinea(
   _prev: ProductActionState | undefined,
   formData: FormData,
 ): Promise<ProductActionState> {
-  const supabase = await createClient();
+  const gate = await requireAdminCatalog();
+  if (gate.error) return { error: gate.error };
+  const supabase = gate.supabase;
   const parsed = lineaSchema.safeParse({
     nombre: String(formData.get("nombre") ?? "").trim(),
     descripcion: String(formData.get("descripcion") ?? "").trim() || undefined,
@@ -134,7 +153,9 @@ export async function createMaterial(
   _prev: ProductActionState | undefined,
   formData: FormData,
 ): Promise<ProductActionState> {
-  const supabase = await createClient();
+  const gate = await requireAdminCatalog();
+  if (gate.error) return { error: gate.error };
+  const supabase = gate.supabase;
   const parsed = materialSchema.safeParse({
     nombre: String(formData.get("nombre") ?? "").trim(),
     abreviatura: String(formData.get("abreviatura") ?? "").trim().toUpperCase(),
@@ -153,7 +174,9 @@ export async function createProducto(
   _prev: ProductActionState | undefined,
   formData: FormData,
 ): Promise<ProductActionState> {
-  const supabase = await createClient();
+  const gate = await requireAdminCatalog();
+  if (gate.error) return { error: gate.error };
+  const supabase = gate.supabase;
   const base = baseProductoSchema.safeParse({
     codigo: String(formData.get("codigo") ?? "").trim().toUpperCase(),
     descripcion: String(formData.get("descripcion") ?? "").trim(),
@@ -208,7 +231,9 @@ export async function updateProducto(
   _prev: ProductActionState | undefined,
   formData: FormData,
 ): Promise<ProductActionState> {
-  const supabase = await createClient();
+  const gate = await requireAdminCatalog();
+  if (gate.error) return { error: gate.error };
+  const supabase = gate.supabase;
   const parsed = updateProductoSchema.safeParse({
     producto_id: formData.get("producto_id"),
     codigo: String(formData.get("codigo") ?? "").trim().toUpperCase(),
@@ -284,7 +309,11 @@ export async function updateProducto(
 }
 
 export async function deleteProducto(formData: FormData) {
-  const supabase = await createClient();
+  const gate = await requireAdminCatalog();
+  if (gate.error) {
+    redirect(`/productos?error=${encodeURIComponent(gate.error)}`);
+  }
+  const supabase = gate.supabase;
   const id = Number(formData.get("producto_id"));
   if (!Number.isFinite(id) || id <= 0) {
     redirect("/productos");

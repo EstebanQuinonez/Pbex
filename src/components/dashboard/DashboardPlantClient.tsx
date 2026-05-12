@@ -180,7 +180,9 @@ export function DashboardPlantClient({
               <p className="mt-2 text-3xl font-semibold tabular-nums text-emerald-950 dark:text-emerald-50">
                 {fmtInt(kpi.produccion_total)}
               </p>
-              <p className="mt-1 text-sm text-emerald-900/80 dark:text-emerald-200/80">unidades registradas</p>
+              <p className="mt-1 text-sm text-emerald-900/80 dark:text-emerald-200/80">
+                Unidades netas: total fabricado en producción menos mermas ligadas a ese registro.
+              </p>
             </article>
             <article className="rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm dark:border-amber-900/50 dark:from-amber-950/35 dark:to-zinc-950">
               <p className="text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-300/90">

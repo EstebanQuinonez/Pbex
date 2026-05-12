@@ -31,3 +31,16 @@ export type RegistroCatalogs = {
   encargados: EncargadoRegistroOption[];
   operarios: OperarioRegistroOption[];
 };
+
+/** Producciones recientes elegibles para asociar MERMA_RECORDED. */
+export type ProduccionParaMerma = {
+  id: string;
+  timestamp: string;
+  cantidad_bruta: number;
+  merma_acumulada: number;
+  /** Bruta − merma ya registrada (misma referencia). */
+  disponible: number;
+  producto_id: number | null;
+  maquina_id: number | null;
+  turno: string | null;
+};

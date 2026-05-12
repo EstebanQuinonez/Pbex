@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { DefectForm } from "@/components/forms/DefectForm";
 import { MermaForm } from "@/components/forms/MermaForm";
 import { ProductionForm } from "@/components/forms/ProductionForm";
 import type { RegistroCatalogs } from "@/lib/types/registro-catalog";
+import { loadProduccionesParaMerma } from "@/app/(protected)/registro/load-producciones-merma";
 
-async function loadRegistroCatalogs(): Promise<RegistroCatalogs> {
-  const supabase = await createClient();
+async function loadRegistroCatalogs(supabase: SupabaseClient): Promise<RegistroCatalogs> {
   const [pr, ma, en, op] = await Promise.all([
     supabase.from("producto").select("id,codigo,descripcion,linea_id").eq("estado", "activo").order("codigo"),
     supabase.from("maquinas").select("id,codigo,nombre,linea_id").order("codigo"),
@@ -22,7 +23,11 @@ async function loadRegistroCatalogs(): Promise<RegistroCatalogs> {
 }
 
 export default async function RegistroPage() {
-  const catalogs = await loadRegistroCatalogs();
+  const supabase = await createClient();
+  const [catalogs, produccionesParaMerma] = await Promise.all([
+    loadRegistroCatalogs(supabase),
+    loadProduccionesParaMerma(supabase),
+  ]);
   const sinCatalogo =
     catalogs.productos.length === 0 ||
     catalogs.maquinas.length === 0 ||
@@ -36,9 +41,8 @@ export default async function RegistroPage() {
           Registros de planta
         </h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Producción y mermas guardan columnas enlazadas a <code className="text-xs">producto</code>,{" "}
-          <code className="text-xs">maquinas</code>, <code className="text-xs">encargados_linea</code> y{" "}
-          <code className="text-xs">operarios</code>; el payload solo lleva metadatos mínimos.
+          Producción guarda la <strong>cantidad bruta</strong>. Cada merma elige la producción de referencia; producto,
+          máquina y turno se toman de ese evento. El payload solo lleva metadatos mínimos.
         </p>
         {sinCatalogo ? (
           <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/50 dark:text-amber-100">
@@ -49,7 +53,7 @@ export default async function RegistroPage() {
       </div>
       <div className="grid gap-8 lg:grid-cols-2">
         <ProductionForm catalogs={catalogs} />
-        <MermaForm catalogs={catalogs} />
+        <MermaForm catalogs={catalogs} producciones={produccionesParaMerma} />
       </div>
       <div className="max-w-xl">
         <DefectForm />

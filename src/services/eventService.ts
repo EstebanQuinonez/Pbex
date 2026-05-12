@@ -13,6 +13,8 @@ export type ProductionEventInput = {
 };
 
 export type MermaEventInput = {
+  /** Evento PRODUCTION_RECORDED al que descuenta esta merma. */
+  produccion_evento_id: string;
   producto_id: number;
   maquina_id: number;
   turno: "A" | "B";
@@ -57,6 +59,7 @@ export async function insertMermaEvent(supabase: SupabaseClient, userId: string,
   return supabase.from("eventos").insert({
     user_id: userId,
     type: "MERMA_RECORDED" satisfies EventType,
+    produccion_evento_id: input.produccion_evento_id,
     producto_id: input.producto_id,
     maquina_id: input.maquina_id,
     turno: input.turno,
