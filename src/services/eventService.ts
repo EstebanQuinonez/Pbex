@@ -91,15 +91,36 @@ export async function insertMermaEvents(
   return supabase.from("eventos").insert(rows);
 }
 
+export type MachineDefectEventInput = {
+  maquina_id: number;
+  /** Debe existir en `fallas_maquina.nombre` (FK en `eventos.falla_maquina`). */
+  falla_maquina: string;
+  cantidad: number;
+  /** ISO 8601 (UTC recomendado desde el cliente). */
+  falla_ocurrida_at: string;
+  /** Etiquetas legibles para payload / analíticas legadas. */
+  nombre_maquina_label: string;
+};
+
 export async function insertDefectEvent(
   supabase: SupabaseClient,
   userId: string,
-  payload: DefectPayload,
+  input: MachineDefectEventInput,
 ) {
+  const payload: DefectPayload = {
+    nombre_maquina: input.nombre_maquina_label,
+    tipo_defecto: input.falla_maquina,
+    cantidad: input.cantidad,
+  };
   return supabase.from("eventos").insert({
     user_id: userId,
     type: "DEFECT_RECORDED" satisfies EventType,
-    payload,
+    maquina_id: input.maquina_id,
+    cantidad: input.cantidad,
+    falla_maquina: input.falla_maquina,
+    falla_ocurrida_at: input.falla_ocurrida_at,
+    falla_resuelta: false,
+    payload: { ...SCHEMA_META, ...payload },
   });
 }
 

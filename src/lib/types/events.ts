@@ -40,6 +40,9 @@ export type EventoRow = {
   merma?: number | null;
   defecto?: string | null;
   falla_maquina?: string | null;
+  /** Momento operativo de la falla (reporte); el alta del evento sigue en `timestamp`. */
+  falla_ocurrida_at?: string | null;
+  falla_resuelta?: boolean | null;
   /** MERMA_RECORDED → evento PRODUCTION_RECORDED padre. */
   produccion_evento_id?: string | null;
 };

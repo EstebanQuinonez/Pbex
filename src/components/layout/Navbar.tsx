@@ -38,8 +38,8 @@ export function Navbar() {
             </Link>
           ) : null}
           {canAccessPath("/admin") ? (
-            <Link className={linkClass} href="/admin">
-              Admin
+            <Link className={linkClass} href="/admin/usuarios">
+              Administración
             </Link>
           ) : null}
           <form action={signOut}>

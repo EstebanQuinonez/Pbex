@@ -25,11 +25,17 @@ export type OperarioRegistroOption = {
   turno: string;
 };
 
+export type FallaMaquinaOption = {
+  id: number;
+  nombre: string;
+};
+
 export type RegistroCatalogs = {
   productos: ProductoRegistroOption[];
   maquinas: MaquinaRegistroOption[];
   encargados: EncargadoRegistroOption[];
   operarios: OperarioRegistroOption[];
+  fallas_maquina: FallaMaquinaOption[];
 };
 
 /** Producciones recientes elegibles para asociar MERMA_RECORDED. */

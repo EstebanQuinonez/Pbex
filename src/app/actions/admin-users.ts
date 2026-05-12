@@ -94,7 +94,7 @@ export async function createUserAsAdmin(
     if (error) {
       return { error: error.message };
     }
-    revalidatePath("/admin");
+    revalidatePath("/admin/usuarios");
     return { success: `Usuario ${email} creado con rol ${app_role}.` };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Error al crear usuario" };
@@ -130,7 +130,7 @@ export async function updateUserRoleAsAdmin(
     if (error) {
       return { error: error.message };
     }
-    revalidatePath("/admin");
+    revalidatePath("/admin/usuarios");
     return { success: "Rol actualizado." };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Error al actualizar rol" };

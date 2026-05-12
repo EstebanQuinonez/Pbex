@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Referencia visual corporativa (azul / gris claro, alineado a pbex.com.pe) */
+  --pbex-surface: #f0f5fa;
+  --pbex-border: #d4dee8;
 }
 
 @theme inline {
@@ -16,6 +19,8 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --pbex-surface: #0f1419;
+    --pbex-border: #2a3a4a;
   }
 }
 

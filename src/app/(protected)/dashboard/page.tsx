@@ -41,8 +41,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           Tablero de planta
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-          Vista para gerencia: KPIs y series calculados en base de datos (una RPC por vista), con filtros por
-          periodo, máquina y turno. Las recomendaciones usan los mismos datos agregados que ves en pantalla.
+          KPIs y series desde una sola RPC. Tras el resumen verás <strong>consejos de IA</strong> alineados a esos datos; en
+          pantallas anchas quedan en una columna fija junto a los gráficos para consultarlos mientras revisas las series.
         </p>
       </header>
 

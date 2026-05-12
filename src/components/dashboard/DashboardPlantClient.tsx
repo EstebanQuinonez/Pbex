@@ -219,111 +219,145 @@ export function DashboardPlantClient({
             </article>
           </section>
 
-          <div className="grid gap-6 lg:grid-cols-1">
-            <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-              <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Producción por día</h3>
-              <p className="mt-0.5 text-xs text-zinc-500">Suma de unidades por día (UTC), eventos PRODUCTION_RECORDED.</p>
-              <div className="mt-4 h-[300px] w-full min-w-0">
-                {produccionDiaria.length === 0 ? (
-                  <p className="text-sm text-zinc-500">Sin datos en el rango seleccionado.</p>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={produccionDiaria} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" className="dark:stroke-zinc-700" />
-                      <XAxis dataKey="etiqueta" tick={{ fill: chartMuted, fontSize: 11 }} />
-                      <YAxis tick={{ fill: chartMuted, fontSize: 11 }} />
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: 8,
-                          border: "1px solid #e4e4e7",
-                          fontSize: 12,
-                        }}
-                        formatter={(v) => [fmtInt(Number(v ?? 0)), "Producción"]}
-                        labelFormatter={(_, p) => {
-                          const pl = p?.[0]?.payload as { dia?: string } | undefined;
-                          return pl?.dia ?? "";
-                        }}
-                      />
-                      <Legend />
-                      <Line type="monotone" dataKey="produccion" name="Unidades" stroke={prodColor} strokeWidth={2} dot={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
+          <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[minmax(0,1fr)_min(360px,34%)] xl:items-start xl:gap-8">
+            <div className="order-2 flex min-w-0 flex-col gap-6 xl:order-1">
+              <div className="grid gap-6 lg:grid-cols-1">
+                <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+                  <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Producción por día</h3>
+                  <p className="mt-0.5 text-xs text-zinc-500">
+                    Suma de unidades por día (UTC), eventos PRODUCTION_RECORDED.
+                  </p>
+                  <div className="mt-4 h-[300px] w-full min-w-0">
+                    {produccionDiaria.length === 0 ? (
+                      <p className="text-sm text-zinc-500">Sin datos en el rango seleccionado.</p>
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={produccionDiaria} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" className="dark:stroke-zinc-700" />
+                          <XAxis dataKey="etiqueta" tick={{ fill: chartMuted, fontSize: 11 }} />
+                          <YAxis tick={{ fill: chartMuted, fontSize: 11 }} />
+                          <Tooltip
+                            contentStyle={{
+                              borderRadius: 8,
+                              border: "1px solid #e4e4e7",
+                              fontSize: 12,
+                            }}
+                            formatter={(v) => [fmtInt(Number(v ?? 0)), "Producción"]}
+                            labelFormatter={(_, p) => {
+                              const pl = p?.[0]?.payload as { dia?: string } | undefined;
+                              return pl?.dia ?? "";
+                            }}
+                          />
+                          <Legend />
+                          <Line
+                            type="monotone"
+                            dataKey="produccion"
+                            name="Unidades"
+                            stroke={prodColor}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
+                </section>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                      <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+                    <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Merma por máquina</h3>
+                    <p className="mt-0.5 text-xs text-zinc-500">Eventos MERMA_RECORDED agregados por máquina.</p>
+                    <div className="mt-4 h-[300px] w-full min-w-0">
+                      {mermaMaquina.length === 0 ? (
+                        <p className="text-sm text-zinc-500">Sin mermas en el filtro.</p>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={mermaMaquina}
+                            layout="vertical"
+                            margin={{ top: 4, right: 12, left: 8, bottom: 4 }}
+                          >
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke="#e4e4e7"
+                              className="dark:stroke-zinc-700"
+                              horizontal={false}
+                            />
+                            <XAxis type="number" tick={{ fill: chartMuted, fontSize: 11 }} />
+                            <YAxis
+                              type="category"
+                              dataKey="nombre"
+                              width={120}
+                              tick={{ fill: chartMuted, fontSize: 10 }}
+                              interval={0}
+                            />
+                            <Tooltip
+                              contentStyle={{ borderRadius: 8, fontSize: 12 }}
+                              formatter={(v) => [fmtInt(Number(v ?? 0)), "Merma"]}
+                            />
+                            <Bar dataKey="merma" name="Merma (u.)" radius={[0, 4, 4, 0]}>
+                              {mermaMaquina.map((_, i) => (
+                                <Cell key={i} fill={mermaColor} fillOpacity={0.85} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </section>
+
+                  <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+                    <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Defectos más frecuentes</h3>
+                    <p className="mt-0.5 text-xs text-zinc-500">Por unidades (columna + legado en payload).</p>
+                    <div className="mt-4 h-[300px] w-full min-w-0">
+                      {defectosChart.length === 0 ? (
+                        <p className="text-sm text-zinc-500">Sin defectos en el filtro.</p>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={defectosChart}
+                            layout="vertical"
+                            margin={{ top: 4, right: 12, left: 8, bottom: 4 }}
+                          >
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke="#e4e4e7"
+                              className="dark:stroke-zinc-700"
+                              horizontal={false}
+                            />
+                            <XAxis type="number" tick={{ fill: chartMuted, fontSize: 11 }} />
+                            <YAxis
+                              type="category"
+                              dataKey="nombre"
+                              width={130}
+                              tick={{ fill: chartMuted, fontSize: 10 }}
+                              interval={0}
+                            />
+                            <Tooltip
+                              contentStyle={{ borderRadius: 8, fontSize: 12 }}
+                              formatter={(v) => [fmtInt(Number(v ?? 0)), "Unidades"]}
+                            />
+                            <Bar dataKey="unidades" name="Unidades" radius={[0, 4, 4, 0]}>
+                              {defectosChart.map((_, i) => (
+                                <Cell key={i} fill={defectColor} fillOpacity={0.85} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </section>
+                </div>
               </div>
-            </section>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Merma por máquina</h3>
-                <p className="mt-0.5 text-xs text-zinc-500">Eventos MERMA_RECORDED agregados por máquina.</p>
-                <div className="mt-4 h-[300px] w-full min-w-0">
-                  {mermaMaquina.length === 0 ? (
-                    <p className="text-sm text-zinc-500">Sin mermas en el filtro.</p>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={mermaMaquina}
-                        layout="vertical"
-                        margin={{ top: 4, right: 12, left: 8, bottom: 4 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" className="dark:stroke-zinc-700" horizontal={false} />
-                        <XAxis type="number" tick={{ fill: chartMuted, fontSize: 11 }} />
-                        <YAxis
-                          type="category"
-                          dataKey="nombre"
-                          width={120}
-                          tick={{ fill: chartMuted, fontSize: 10 }}
-                          interval={0}
-                        />
-                        <Tooltip
-                          contentStyle={{ borderRadius: 8, fontSize: 12 }}
-                          formatter={(v) => [fmtInt(Number(v ?? 0)), "Merma"]}
-                        />
-                        <Bar dataKey="merma" name="Merma (u.)" radius={[0, 4, 4, 0]}>
-                          {mermaMaquina.map((_, i) => (
-                            <Cell key={i} fill={mermaColor} fillOpacity={0.85} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  )}
-                </div>
-              </section>
-
-              <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Defectos más frecuentes</h3>
-                <p className="mt-0.5 text-xs text-zinc-500">Por unidades (columna + legado en payload).</p>
-                <div className="mt-4 h-[300px] w-full min-w-0">
-                  {defectosChart.length === 0 ? (
-                    <p className="text-sm text-zinc-500">Sin defectos en el filtro.</p>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={defectosChart} layout="vertical" margin={{ top: 4, right: 12, left: 8, bottom: 4 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" className="dark:stroke-zinc-700" horizontal={false} />
-                        <XAxis type="number" tick={{ fill: chartMuted, fontSize: 11 }} />
-                        <YAxis type="category" dataKey="nombre" width={130} tick={{ fill: chartMuted, fontSize: 10 }} interval={0} />
-                        <Tooltip
-                          contentStyle={{ borderRadius: 8, fontSize: 12 }}
-                          formatter={(v) => [fmtInt(Number(v ?? 0)), "Unidades"]}
-                        />
-                        <Bar dataKey="unidades" name="Unidades" radius={[0, 4, 4, 0]}>
-                          {defectosChart.map((_, i) => (
-                            <Cell key={i} fill={defectColor} fillOpacity={0.85} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  )}
-                </div>
-              </section>
             </div>
+
+            <aside className="order-1 w-full shrink-0 xl:sticky xl:top-4 xl:order-2 xl:max-h-[calc(100dvh-6rem)] xl:overflow-y-auto xl:self-start">
+              <GroqRecommendations summary={narrativeSummary} structuredContext={structuredContext} />
+            </aside>
           </div>
         </>
       ) : null}
 
-      {kpi ? (
-        <GroqRecommendations summary={narrativeSummary} structuredContext={structuredContext} />
-      ) : null}
     </div>
   );
 }

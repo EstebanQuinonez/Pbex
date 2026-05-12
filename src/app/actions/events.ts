@@ -10,7 +10,6 @@ import {
   insertMermaEvents,
   insertProductionEvent,
 } from "@/services/eventService";
-import type { DefectPayload } from "@/lib/types/events";
 import { grossFromProductionRow } from "@/lib/productionQuantities";
 
 const turnoEnum = z.enum(["A", "B"]);
@@ -56,11 +55,17 @@ function collectMermaLinesFromForm(formData: FormData): unknown[] {
   return out;
 }
 
-const defectSchema = z.object({
-  nombre_maquina: z.string().min(1, "Indica la máquina"),
-  tipo_defecto: z.string().min(1, "Indica el tipo de defecto"),
-  cantidad: z.coerce.number().int().positive("Debe ser al menos 1"),
-});
+const defectSchema = z
+  .object({
+    maquina_id: z.coerce.number().int().positive("Selecciona máquina"),
+    falla_maquina: z.string().min(1, "Selecciona tipo de falla"),
+    cantidad: z.coerce.number().int().positive("Debe ser al menos 1"),
+    falla_ocurrida_at: z.string().min(1, "Indica fecha y hora de la falla"),
+  })
+  .refine((row) => !Number.isNaN(Date.parse(row.falla_ocurrida_at)), {
+    message: "Fecha u hora inválida",
+    path: ["falla_ocurrida_at"],
+  });
 
 export type ActionState = { error?: string; success?: string };
 
@@ -235,19 +240,34 @@ export async function submitDefect(
   }
 
   const parsed = defectSchema.safeParse({
-    nombre_maquina: formData.get("nombre_maquina"),
-    tipo_defecto: formData.get("tipo_defecto"),
+    maquina_id: formData.get("maquina_id"),
+    falla_maquina: formData.get("falla_maquina"),
     cantidad: formData.get("cantidad"),
+    falla_ocurrida_at: formData.get("falla_ocurrida_at"),
   });
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
 
-  const { error } = await insertDefectEvent(supabase, user.id, parsed.data as DefectPayload);
+  const [{ data: maq, error: me }, { data: fallaRow, error: fe }] = await Promise.all([
+    supabase.from("maquinas").select("codigo,nombre").eq("id", parsed.data.maquina_id).maybeSingle(),
+    supabase.from("fallas_maquina").select("nombre").eq("nombre", parsed.data.falla_maquina).maybeSingle(),
+  ]);
+  if (me || !maq) return { error: "Máquina no encontrada." };
+  if (fe || !fallaRow) return { error: "Tipo de falla no válido o no está en el catálogo." };
+
+  const { error } = await insertDefectEvent(supabase, user.id, {
+    maquina_id: parsed.data.maquina_id,
+    falla_maquina: fallaRow.nombre,
+    cantidad: parsed.data.cantidad,
+    falla_ocurrida_at: new Date(parsed.data.falla_ocurrida_at).toISOString(),
+    nombre_maquina_label: `${maq.codigo} — ${maq.nombre}`,
+  });
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
   revalidatePath("/registro");
-  return { success: "Defecto registrado (DEFECT_RECORDED)." };
+  revalidatePath("/admin/fallas");
+  return { success: "Reporte de falla registrado (DEFECT_RECORDED)." };
 }
