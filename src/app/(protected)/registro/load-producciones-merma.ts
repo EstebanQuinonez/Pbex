@@ -8,7 +8,7 @@ export async function loadProduccionesParaMerma(supabase: SupabaseClient): Promi
     .select("id,timestamp,cantidad,producto_id,maquina_id,turno,payload")
     .eq("type", "PRODUCTION_RECORDED")
     .order("timestamp", { ascending: false })
-    .limit(120);
+    .limit(200);
 
   if (error || !prods?.length) return [];
 

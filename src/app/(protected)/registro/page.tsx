@@ -41,8 +41,9 @@ export default async function RegistroPage() {
           Registros de planta
         </h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Producción guarda la <strong>cantidad bruta</strong>. Cada merma elige la producción de referencia; producto,
-          máquina y turno se toman de ese evento. El payload solo lleva metadatos mínimos.
+          En <strong>producción</strong> indicas la cantidad <strong>bruta</strong>. En <strong>merma</strong> eliges la
+          misma fila de producción (fecha, turno, máquina y producto se muestran solos) y solo completas cantidad de
+          merma y tipo de defecto.
         </p>
         {sinCatalogo ? (
           <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/50 dark:text-amber-100">

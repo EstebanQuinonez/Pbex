@@ -19,6 +19,13 @@ export type MermaEventInput = {
   maquina_id: number;
   turno: "A" | "B";
   merma: number;
+  /** Clasificación de la merma (columna `defecto`, mismo dominio que DEFECT_RECORDED). */
+  defecto: string;
+};
+
+export type MermaLineInput = {
+  merma: number;
+  defecto: string;
 };
 
 export type OrderCreatedEventInput = {
@@ -56,16 +63,32 @@ export async function insertProductionEvent(
 }
 
 export async function insertMermaEvent(supabase: SupabaseClient, userId: string, input: MermaEventInput) {
-  return supabase.from("eventos").insert({
+  const { merma, defecto, ...shared } = input;
+  return insertMermaEvents(supabase, userId, shared, [{ merma, defecto }]);
+}
+
+/** Una o varias filas MERMA_RECORDED para la misma producción (inserción atómica en un solo INSERT). */
+export async function insertMermaEvents(
+  supabase: SupabaseClient,
+  userId: string,
+  shared: Omit<MermaEventInput, "merma" | "defecto">,
+  lines: MermaLineInput[],
+) {
+  if (lines.length === 0) {
+    return { data: null, error: { message: "No hay líneas de merma." } as { message: string } };
+  }
+  const rows = lines.map((line) => ({
     user_id: userId,
     type: "MERMA_RECORDED" satisfies EventType,
-    produccion_evento_id: input.produccion_evento_id,
-    producto_id: input.producto_id,
-    maquina_id: input.maquina_id,
-    turno: input.turno,
-    merma: input.merma,
+    produccion_evento_id: shared.produccion_evento_id,
+    producto_id: shared.producto_id,
+    maquina_id: shared.maquina_id,
+    turno: shared.turno,
+    merma: line.merma,
+    defecto: line.defecto,
     payload: SCHEMA_META,
-  });
+  }));
+  return supabase.from("eventos").insert(rows);
 }
 
 export async function insertDefectEvent(

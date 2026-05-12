@@ -7,7 +7,7 @@ import { parseAppRole } from "@/lib/auth/roles";
 import { canRecordPlantEvents } from "@/lib/auth/action-roles";
 import {
   insertDefectEvent,
-  insertMermaEvent,
+  insertMermaEvents,
   insertProductionEvent,
 } from "@/services/eventService";
 import type { DefectPayload } from "@/lib/types/events";
@@ -24,10 +24,37 @@ const productionStructuredSchema = z.object({
   operario_id: z.coerce.number().int().positive("Selecciona operario"),
 });
 
-const mermaSchema = z.object({
-  produccion_evento_id: z.string().uuid("Selecciona la producción de referencia"),
-  merma: z.coerce.number().positive("Merma debe ser mayor que 0"),
+const mermaDefectoEnum = z.enum(["manchas", "incompletos", "color", "rebaba", "rechazo_calidad"], {
+  message: "Selecciona el tipo de defecto de la merma",
 });
+
+const mermaProduccionIdSchema = z.object({
+  produccion_evento_id: z.preprocess(
+    (v) => (v == null || String(v).trim() === "" ? undefined : String(v).trim()),
+    z.string({ error: "Selecciona la producción de referencia" }).uuid("Identificador de producción inválido"),
+  ),
+});
+
+const mermaLineRowSchema = z.object({
+  defecto: z.preprocess(
+    (v) => (v == null || String(v).trim() === "" ? undefined : String(v).trim()),
+    mermaDefectoEnum,
+  ),
+  merma: z.coerce.number().positive("Cada cantidad debe ser mayor que 0"),
+});
+
+function collectMermaLinesFromForm(formData: FormData): unknown[] {
+  const out: unknown[] = [];
+  let i = 0;
+  while (i < 30 && (formData.has(`merma_${i}`) || formData.has(`defecto_${i}`))) {
+    out.push({
+      defecto: formData.get(`defecto_${i}`),
+      merma: formData.get(`merma_${i}`),
+    });
+    i++;
+  }
+  return out;
+}
 
 const defectSchema = z.object({
   nombre_maquina: z.string().min(1, "Indica la máquina"),
@@ -108,18 +135,23 @@ export async function submitMerma(
     return { error: "No tienes permiso para registrar mermas." };
   }
 
-  const parsed = mermaSchema.safeParse({
+  const parsedId = mermaProduccionIdSchema.safeParse({
     produccion_evento_id: formData.get("produccion_evento_id"),
-    merma: formData.get("merma"),
   });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+  if (!parsedId.success) {
+    return { error: parsedId.error.issues[0]?.message ?? "Datos inválidos" };
+  }
+
+  const rawLines = collectMermaLinesFromForm(formData);
+  const linesParsed = z.array(mermaLineRowSchema).min(1).max(30).safeParse(rawLines);
+  if (!linesParsed.success) {
+    return { error: linesParsed.error.issues[0]?.message ?? "Revisa cada línea: tipo de defecto y cantidad." };
   }
 
   const { data: parent, error: pe } = await supabase
     .from("eventos")
     .select("id,type,producto_id,maquina_id,turno,cantidad,payload")
-    .eq("id", parsed.data.produccion_evento_id)
+    .eq("id", parsedId.data.produccion_evento_id)
     .maybeSingle();
 
   if (pe || !parent) return { error: "Producción de referencia no encontrada o sin acceso." };
@@ -157,25 +189,36 @@ export async function submitMerma(
 
   const acumulada = (mermasPrev ?? []).reduce((acc, r) => acc + Number(r.merma ?? 0), 0);
   const disponible = bruta - acumulada;
+  const totalMerma = linesParsed.data.reduce((s, l) => s + l.merma, 0);
   const eps = 1e-6;
-  if (parsed.data.merma > disponible + eps) {
+  if (totalMerma > disponible + eps) {
     return {
-      error: `La merma (${parsed.data.merma}) supera lo disponible (${disponible.toFixed(4)}). Bruta: ${bruta}, ya registrado: ${acumulada}.`,
+      error: `La suma de mermas (${totalMerma}) supera lo disponible (${disponible.toFixed(4)}). Bruta: ${bruta}, ya registrado: ${acumulada}.`,
     };
   }
 
-  const { error } = await insertMermaEvent(supabase, user.id, {
-    produccion_evento_id: parsed.data.produccion_evento_id,
-    producto_id: pid,
-    maquina_id: mid,
-    turno: turnoP,
-    merma: parsed.data.merma,
-  });
+  const { error } = await insertMermaEvents(
+    supabase,
+    user.id,
+    {
+      produccion_evento_id: parsedId.data.produccion_evento_id,
+      producto_id: pid,
+      maquina_id: mid,
+      turno: turnoP,
+    },
+    linesParsed.data,
+  );
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
   revalidatePath("/registro");
-  return { success: "Merma registrada (MERMA_RECORDED)." };
+  const n = linesParsed.data.length;
+  return {
+    success:
+      n === 1
+        ? "Merma registrada (MERMA_RECORDED)."
+        : `Se registraron ${n} líneas de merma (${n} eventos MERMA_RECORDED).`,
+  };
 }
 
 export async function submitDefect(
