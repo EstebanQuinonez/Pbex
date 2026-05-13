@@ -19,18 +19,20 @@ export async function fetchGroqRecommendations(input: GroqRecommendationInput): 
   const userBlocks: string[] = [];
   if (input.structuredContext && Object.keys(input.structuredContext).length > 0) {
     userBlocks.push(
-      "### Datos estructurados del tablero (JSON)\n```json\n" +
+      "### Contexto numérico (JSON)\n```json\n" +
         JSON.stringify(input.structuredContext, null, 2) +
         "\n```",
     );
   }
-  userBlocks.push("### Resumen operativo\n" + input.summary);
+  userBlocks.push("### Síntesis del periodo\n" + input.summary);
   userBlocks.push(
     [
-      "### Instrucciones",
-      "Genera entre 4 y 6 recomendaciones numeradas para supervisores de planta.",
-      "Prioriza: mantenimiento preventivo si hay fallas de máquina o concentración de merma; ajuste de carga o turnos si la producción por máquina/turno está desbalanceada; alertas de eficiencia y calidad si % merma o defectos son altos o empeoran vs la tendencia.",
-      "Cada ítem debe ser accionable (qué revisar, qué medir, plazo sugerido corto). Español claro, sin jerga innecesaria.",
+      "### Formato de salida (obligatorio)",
+      "Responde únicamente con entre 4 y 6 líneas; cada línea debe empezar por un número, punto y espacio (ej.: \"1. ...\").",
+      "No escribas títulos, introducciones, conclusiones ni párrafos fuera de esa lista.",
+      "No uses frases como \"basado en los datos\", \"datos proporcionados\", \"siguientes recomendaciones\" o \"a continuación\" al comienzo del mensaje o fuera de los ítems numerados.",
+      "Prioriza: mantenimiento preventivo si hay fallas de máquina o concentración de merma; ajuste de carga o turnos si la producción por máquina o turno está desbalanceada; eficiencia y calidad si la merma o los defectos son altos o empeoran frente a la tendencia.",
+      "Cada ítem debe ser accionable (qué revisar, qué medir, plazo corto). Español claro y directo.",
     ].join("\n"),
   );
 
@@ -41,7 +43,7 @@ export async function fetchGroqRecommendations(input: GroqRecommendationInput): 
         role: "system",
         content:
           "Eres un consultor senior de manufactura, TPM y calidad en planta de transformación (inyección/soplado). " +
-          "Interpretas KPIs reales y respondes en español con tono profesional, directo y fácil de ejecutar en piso.",
+          "Tu respuesta para el usuario final es solo una lista numerada de acciones concretas, sin metatexto ni introducción.",
       },
       { role: "user", content: userBlocks.join("\n\n") },
     ],

@@ -7,6 +7,24 @@ type Props = {
   structuredContext?: Record<string, unknown>;
 };
 
+/** Ignora párrafos introductorios habituales del modelo. */
+function isNoiseIntroLine(line: string): boolean {
+  const t = line.toLowerCase();
+  return (
+    /basado en (los )?datos|datos proporcionados|siguientes recomendaciones|se presentan las siguientes|presenta las siguientes|a continuaci[oó]n|en base a la informaci[oó]n|de acuerdo con (los )?indicadores/i.test(
+      t,
+    ) || /^(para|en) (los )?supervisores/i.test(t)
+  );
+}
+
+/** Recorta todo lo anterior a la primera línea numerada (1. …). */
+function trimToFirstNumberedBlock(raw: string): string {
+  const lines = raw.split(/\r?\n/);
+  const idx = lines.findIndex((l) => /^\s*\d+[\.)]\s/.test(l));
+  if (idx === -1) return raw.trim();
+  return lines.slice(idx).join("\n").trim();
+}
+
 /** Convierte respuesta tipo "1. ..." / guiones en bloques legibles. */
 function parseRecommendationBlocks(raw: string): { intro: string[]; items: string[] } {
   const intro: string[] = [];
@@ -18,7 +36,7 @@ function parseRecommendationBlocks(raw: string): { intro: string[]; items: strin
     const bullet = t.match(/^[-•*]\s*(.+)$/);
     if (numbered?.[1]) items.push(numbered[1].trim());
     else if (bullet?.[1]) items.push(bullet[1].trim());
-    else intro.push(t);
+    else if (!isNoiseIntroLine(t)) intro.push(t);
   }
   return { intro, items };
 }
@@ -59,7 +77,11 @@ export function GroqRecommendations({ summary, structuredContext }: Props) {
     };
   }, [summary, structuredContext]);
 
-  const parsed = useMemo(() => (text ? parseRecommendationBlocks(text) : { intro: [], items: [] }), [text]);
+  const parsed = useMemo(() => {
+    if (!text) return { intro: [], items: [] };
+    const trimmed = trimToFirstNumberedBlock(text);
+    return parseRecommendationBlocks(trimmed);
+  }, [text]);
 
   return (
     <section
@@ -75,17 +97,13 @@ export function GroqRecommendations({ summary, structuredContext }: Props) {
           ✦
         </span>
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70">Resumen del periodo</p>
-          <h2 className="text-lg font-semibold leading-snug text-white">Recomendaciones operativas</h2>
-          <p className="mt-1 text-xs leading-relaxed text-white/85">
-            Elaboradas con los mismos indicadores del tablero · uso interno
-          </p>
+          <h2 className="text-lg font-semibold leading-snug text-white">Recomendaciones para la operación</h2>
         </div>
       </div>
 
       <div className="border-t border-white/50 bg-white/60 px-5 py-4 dark:border-zinc-700/50 dark:bg-zinc-950/40">
         {loading ? (
-          <div className="space-y-3" aria-busy="true" aria-label="Generando consejos">
+          <div className="space-y-3" aria-busy="true" aria-label="Preparando recomendaciones">
             <div
               className="h-3 w-full max-w-md animate-pulse rounded-full opacity-60"
               style={{ background: "var(--pbex-border)" }}
