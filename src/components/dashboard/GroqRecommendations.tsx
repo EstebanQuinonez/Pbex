@@ -44,7 +44,7 @@ export function GroqRecommendations({ summary, structuredContext }: Props) {
         });
         const data = (await res.json()) as { recommendations?: string; error?: string };
         if (!res.ok) {
-          throw new Error(data.error || "Error al obtener recomendaciones");
+          throw new Error(data.error || "No se pudieron cargar las sugerencias.");
         }
         if (!cancelled) setText(data.recommendations ?? "");
       } catch (e) {
@@ -75,10 +75,10 @@ export function GroqRecommendations({ summary, structuredContext }: Props) {
           ✦
         </span>
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70">Tras revisar el tablero</p>
-          <h2 className="text-lg font-semibold leading-snug text-white">Consejos para supervisión</h2>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70">Resumen del periodo</p>
+          <h2 className="text-lg font-semibold leading-snug text-white">Recomendaciones operativas</h2>
           <p className="mt-1 text-xs leading-relaxed text-white/85">
-            Misma ventana de KPI que acabas de ver · generado con IA (Groq) · uso interno
+            Elaboradas con los mismos indicadores del tablero · uso interno
           </p>
         </div>
       </div>
@@ -98,9 +98,7 @@ export function GroqRecommendations({ summary, structuredContext }: Props) {
               className="h-3 w-4/5 max-w-sm animate-pulse rounded-full opacity-40"
               style={{ background: "var(--pbex-border)" }}
             />
-            <p className="text-xs font-medium text-[#124771] dark:text-sky-300/90">
-              Analizando producción, merma, defectos y tendencias…
-            </p>
+            <p className="text-xs font-medium text-[#124771] dark:text-sky-300/90">Preparando sugerencias…</p>
           </div>
         ) : null}
 

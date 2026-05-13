@@ -45,8 +45,7 @@ export function ProductionForm({ catalogs }: { catalogs: RegistroCatalogs }) {
       <div>
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Producción</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Evento <code className="text-xs">PRODUCTION_RECORDED</code> con columnas enlazadas a catálogos. Indica la{" "}
-          <strong>producción total (bruta)</strong>; las mermas se registran aparte y descuentan de este total.
+          Indica la <strong>producción total en bruto</strong>. Las mermas se registran después y descuentan de este total.
         </p>
       </div>
 

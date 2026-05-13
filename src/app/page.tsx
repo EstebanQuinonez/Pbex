@@ -20,8 +20,8 @@ export default async function Home() {
           Gestión de producción Pbex
         </h1>
         <p className="text-lg text-zinc-600 dark:text-zinc-400">
-          Registra producción y defectos como eventos en Supabase, analiza eficiencia y desperdicio, y obtén
-          recomendaciones con Groq.
+          Control de planta, pedidos y tablero gerencial en un solo entorno, con análisis y sugerencias para la operación
+          diaria.
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-4">

@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
       <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
         <h1 className="text-center text-xl font-semibold text-zinc-900 dark:text-zinc-50">Iniciar sesión</h1>
         <p className="mt-2 text-center text-sm text-zinc-600 dark:text-zinc-400">
-          Accede con tu cuenta de Supabase Auth.
+          Introduce el correo y la contraseña de tu cuenta corporativa.
         </p>
         <div className="mt-8">
           <LoginForm nextPath={nextPath} />

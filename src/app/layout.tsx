@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Pbex — Producción",
-  description: "Sistema de gestión de producción con Supabase y análisis asistido por Groq.",
+  description: "Gestión de producción, pedidos y tablero operativo para Plásticos Básicos de Exportación.",
 };
 
 export default function RootLayout({

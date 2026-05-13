@@ -7,7 +7,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
         <h1 className="text-center text-xl font-semibold text-zinc-900 dark:text-zinc-50">Crear cuenta</h1>
         <p className="mt-2 text-center text-sm text-zinc-600 dark:text-zinc-400">
-          El registro usa Supabase Auth (correo y contraseña).
+          Crea tu acceso con correo electrónico y una contraseña segura.
         </p>
         <div className="mt-8">
           <RegisterForm />

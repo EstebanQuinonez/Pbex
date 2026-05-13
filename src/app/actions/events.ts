@@ -124,7 +124,7 @@ export async function submitProduction(
 
   revalidatePath("/dashboard");
   revalidatePath("/registro");
-  return { success: "Producción registrada (PRODUCTION_RECORDED)." };
+  return { success: "Producción guardada correctamente." };
 }
 
 export async function submitMerma(
@@ -161,7 +161,7 @@ export async function submitMerma(
 
   if (pe || !parent) return { error: "Producción de referencia no encontrada o sin acceso." };
   if (parent.type !== "PRODUCTION_RECORDED") {
-    return { error: "El evento seleccionado no es una producción válida." };
+    return { error: "La referencia elegida no corresponde a un registro de producción válido." };
   }
 
   const bruta = grossFromProductionRow(parent);
@@ -181,7 +181,7 @@ export async function submitMerma(
   if (perr || !prod) return { error: "Producto de la producción no encontrado." };
   if (merr || !maq) return { error: "Máquina de la producción no encontrada." };
   if (prod.linea_id !== maq.linea_id) {
-    return { error: "Inconsistencia línea producto/máquina en el evento de producción." };
+    return { error: "Los datos de producto y máquina no coinciden. Revisa el registro o contacta a sistemas." };
   }
 
   const { data: mermasPrev, error: msumErr } = await supabase
@@ -219,10 +219,7 @@ export async function submitMerma(
   revalidatePath("/registro");
   const n = linesParsed.data.length;
   return {
-    success:
-      n === 1
-        ? "Merma registrada (MERMA_RECORDED)."
-        : `Se registraron ${n} líneas de merma (${n} eventos MERMA_RECORDED).`,
+    success: n === 1 ? "Merma registrada correctamente." : `Se registraron ${n} líneas de merma correctamente.`,
   };
 }
 
@@ -269,5 +266,5 @@ export async function submitDefect(
   revalidatePath("/dashboard");
   revalidatePath("/registro");
   revalidatePath("/admin/fallas");
-  return { success: "Reporte de falla registrado (DEFECT_RECORDED)." };
+  return { success: "Reporte de falla guardado correctamente." };
 }

@@ -44,15 +44,14 @@ export default async function RegistroPage() {
           Registros de planta
         </h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          En <strong>producción</strong> indicas la cantidad <strong>bruta</strong>. En <strong>merma</strong> eliges la
-          misma fila de producción (fecha, turno, máquina y producto se muestran solos) y solo completas cantidad de
-          merma y tipo de defecto.
+          <strong>Producción</strong>: cantidad en bruto. <strong>Merma</strong>: descuentos ligados a la misma
+          referencia de producción (tipo de defecto y cantidad). <strong>Fallas de máquina</strong>: reportes de
+          mantenimiento.
         </p>
         {sinCatalogo ? (
           <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/50 dark:text-amber-100">
-            Faltan datos en catálogos (productos activos, máquinas, encargados, operarios o tipos de falla de máquina).
-            Aplica la migración <code className="text-xs">004_catalogos_industriales.sql</code> y crea registros en esas
-            tablas.
+            Faltan datos maestros (productos, máquinas, personal u opciones de falla). Solicita a administración que
+            complete los catálogos antes de registrar en planta.
           </p>
         ) : null}
       </div>

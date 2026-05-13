@@ -42,7 +42,7 @@ export async function signUp(
   revalidatePath("/", "layout");
   return {
     success:
-      "Cuenta creada. Si Supabase exige confirmación por correo, revisa tu bandeja de entrada antes de iniciar sesión.",
+      "Cuenta creada. Si tu organización exige confirmar el correo, revisa tu bandeja antes de iniciar sesión.",
   };
 }
 

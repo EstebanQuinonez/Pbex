@@ -78,12 +78,14 @@ export function DashboardPlantClient({
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+      <section className="rounded-2xl border border-[var(--pbex-border)] bg-gradient-to-b from-[var(--pbex-surface)]/60 to-white p-5 shadow-sm dark:border-zinc-700/80 dark:from-zinc-900/40 dark:to-zinc-950">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Filtros</h2>
-            <p className="mt-1 text-xs text-zinc-500">
-              Los datos se agregan en Supabase con una sola consulta RPC. Fechas en calendario UTC.
+            <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-[#124771] dark:text-sky-300/90">
+              Filtros
+            </h2>
+            <p className="mt-1 max-w-md text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Ajusta el periodo y, si aplica, máquina y turno. Las fechas siguen el calendario estándar del navegador.
             </p>
           </div>
           <form
@@ -141,7 +143,7 @@ export function DashboardPlantClient({
             </label>
             <button
               type="submit"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              className="rounded-lg bg-gradient-to-r from-[#0a2540] to-[#124771] px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 dark:from-[#1e3a5f] dark:to-[#2563a8]"
             >
               Aplicar
             </button>
@@ -161,11 +163,10 @@ export function DashboardPlantClient({
           role="alert"
           className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
         >
-          <strong className="font-semibold">No se pudieron cargar los KPI.</strong> {kpiError}
-          <p className="mt-2 text-xs opacity-90">
-            Aplica la migración <code className="rounded bg-amber-100/80 px-1 dark:bg-amber-900/60">006_dashboard_rls_and_kpis.sql</code> en
-            Supabase y comprueba que tu usuario tenga rol <code className="rounded px-1">GERENTE</code> o{" "}
-            <code className="rounded px-1">ADMIN</code> en <code className="rounded px-1">user_metadata.app_role</code>.
+          <strong className="font-semibold">No se pudieron cargar los indicadores.</strong> {kpiError}
+          <p className="mt-2 text-xs leading-relaxed opacity-90">
+            Si el problema continúa, pide a administración de TI que revise permisos de tu cuenta y la configuración del
+            tablero.
           </p>
         </div>
       ) : null}
@@ -181,7 +182,7 @@ export function DashboardPlantClient({
                 {fmtInt(kpi.produccion_total)}
               </p>
               <p className="mt-1 text-sm text-emerald-900/80 dark:text-emerald-200/80">
-                Unidades netas: total fabricado en producción menos mermas ligadas a ese registro.
+                Fabricación neta del periodo (producción menos merma asociada).
               </p>
             </article>
             <article className="rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm dark:border-amber-900/50 dark:from-amber-950/35 dark:to-zinc-950">
@@ -202,9 +203,7 @@ export function DashboardPlantClient({
               </p>
             </article>
             <article className="rounded-xl border border-sky-200/80 bg-gradient-to-br from-sky-50 to-white p-5 shadow-sm dark:border-sky-900/50 dark:from-sky-950/35 dark:to-zinc-950">
-              <p className="text-xs font-semibold uppercase tracking-wide text-sky-900 dark:text-sky-300/90">
-                Pedidos (eventos)
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-sky-900 dark:text-sky-300/90">Pedidos</p>
               <p className="mt-2 flex flex-wrap items-baseline gap-2 text-zinc-800 dark:text-zinc-100">
                 <span className="text-2xl font-semibold tabular-nums">{fmtInt(kpi.pedidos_creados)}</span>
                 <span className="text-sm text-zinc-500">creados</span>
@@ -224,9 +223,7 @@ export function DashboardPlantClient({
               <div className="grid gap-6 lg:grid-cols-1">
                 <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
                   <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Producción por día</h3>
-                  <p className="mt-0.5 text-xs text-zinc-500">
-                    Suma de unidades por día (UTC), eventos PRODUCTION_RECORDED.
-                  </p>
+                  <p className="mt-0.5 text-xs text-zinc-500">Unidades fabricadas por día en el periodo seleccionado.</p>
                   <div className="mt-4 h-[300px] w-full min-w-0">
                     {produccionDiaria.length === 0 ? (
                       <p className="text-sm text-zinc-500">Sin datos en el rango seleccionado.</p>
@@ -266,7 +263,7 @@ export function DashboardPlantClient({
                 <div className="grid gap-6 lg:grid-cols-2">
                       <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
                     <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Merma por máquina</h3>
-                    <p className="mt-0.5 text-xs text-zinc-500">Eventos MERMA_RECORDED agregados por máquina.</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">Merma registrada por máquina en el mismo periodo.</p>
                     <div className="mt-4 h-[300px] w-full min-w-0">
                       {mermaMaquina.length === 0 ? (
                         <p className="text-sm text-zinc-500">Sin mermas en el filtro.</p>
@@ -308,7 +305,7 @@ export function DashboardPlantClient({
 
                   <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
                     <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Defectos más frecuentes</h3>
-                    <p className="mt-0.5 text-xs text-zinc-500">Por unidades (columna + legado en payload).</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">Unidades por tipo de defecto de producto.</p>
                     <div className="mt-4 h-[300px] w-full min-w-0">
                       {defectosChart.length === 0 ? (
                         <p className="text-sm text-zinc-500">Sin defectos en el filtro.</p>

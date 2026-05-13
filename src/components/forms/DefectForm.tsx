@@ -41,9 +41,8 @@ export function DefectForm({
       <div>
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Fallas de máquina</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Reporte operativo: eliges <strong>máquina</strong> y <strong>tipo de falla</strong> del catálogo, la{" "}
-          <strong>fecha y hora en que ocurrió</strong> y la cantidad afectada. Se guarda como{" "}
-          <code className="text-xs">DEFECT_RECORDED</code> con enlace al catálogo <code className="text-xs">fallas_maquina</code>.
+          Registra la máquina afectada, el <strong>tipo de falla</strong> del catálogo, la <strong>fecha y hora</strong> en
+          que ocurrió y la cantidad afectada.
         </p>
       </div>
 
@@ -52,8 +51,7 @@ export function DefectForm({
           {sinMaquinas ? "No hay máquinas en catálogo. " : null}
           {sinFallas ? (
             <>
-              No hay tipos de falla en <code className="text-xs">fallas_maquina</code>. Aplica la migración{" "}
-              <code className="text-xs">004_catalogos_industriales.sql</code> o inserta filas en esa tabla.
+              Aún no hay tipos de falla configurados para máquinas. Pide a administración que complete el catálogo de fallas.
             </>
           ) : null}
         </p>
@@ -104,7 +102,7 @@ export function DefectForm({
         />
         <input type="hidden" name="falla_ocurrida_at" value={fallaOcurridaIso} />
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Se interpreta en la zona horaria de tu navegador y se guarda en UTC en el servidor.
+          Usa la fecha y hora locales de tu equipo; el sistema las guarda de forma consistente.
         </p>
       </Field>
 

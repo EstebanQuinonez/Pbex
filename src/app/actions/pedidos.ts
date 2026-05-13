@@ -69,12 +69,12 @@ export async function crearPedidoConEvento(
     cantidad,
   });
   if (evErr) {
-    return { error: `Pedido creado pero falló el evento ORDER_CREATED: ${evErr.message}` };
+    return { error: `El pedido se creó, pero no se pudo registrar el seguimiento interno. Avísale a sistemas: ${evErr.message}` };
   }
 
   revalidatePath("/pedidos");
   revalidatePath("/dashboard");
-  return { success: "Pedido creado y evento ORDER_CREATED registrado." };
+  return { success: "Pedido registrado correctamente." };
 }
 
 const completarSchema = z.object({
@@ -119,10 +119,10 @@ export async function completarPedidoConEvento(
     cantidad: pedido.cantidad,
   });
   if (evErr) {
-    return { error: `Estado actualizado pero falló ORDER_COMPLETED: ${evErr.message}` };
+    return { error: `El pedido se marcó como completado, pero falló el cierre en seguimiento. Avísale a sistemas: ${evErr.message}` };
   }
 
   revalidatePath("/pedidos");
   revalidatePath("/dashboard");
-  return { success: "Pedido completado (ORDER_COMPLETED)." };
+  return { success: "Pedido marcado como completado." };
 }

@@ -11,7 +11,7 @@ export type GroqRecommendationInput = {
 export async function fetchGroqRecommendations(input: GroqRecommendationInput): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return "Configura GROQ_API_KEY en el entorno para ver recomendaciones de IA.";
+    return "Las sugerencias automáticas no están disponibles en este entorno. Si las necesitas, contacta al administrador.";
   }
 
   const client = new Groq({ apiKey });
@@ -50,5 +50,5 @@ export async function fetchGroqRecommendations(input: GroqRecommendationInput): 
   });
 
   const text = completion.choices[0]?.message?.content?.trim();
-  return text || "No se recibió texto del modelo.";
+  return text || "No hubo respuesta del asistente. Vuelve a intentar.";
 }

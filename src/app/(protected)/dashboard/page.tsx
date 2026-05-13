@@ -31,7 +31,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const narrativeSummary =
     kpi != null
       ? buildNarrativeSummary(kpi, filters)
-      : "No hay datos agregados disponibles; revisa la conexión a Supabase o la migración del dashboard.";
+      : "No hay datos consolidados para este periodo. Comprueba los filtros o intenta más tarde.";
   const structuredContext = kpi != null ? buildStructuredRecommendationContext(kpi, filters) : {};
 
   return (
@@ -41,8 +41,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           Tablero de planta
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-          KPIs y series desde una sola RPC. Tras el resumen verás <strong>consejos de IA</strong> alineados a esos datos; en
-          pantallas anchas quedan en una columna fija junto a los gráficos para consultarlos mientras revisas las series.
+          Indicadores de producción, merma y pedidos con filtros por fechas, máquina y turno. A la derecha (en pantalla
+          ancha) encontrarás <strong>recomendaciones operativas</strong> elaboradas a partir de los mismos números que ves
+          aquí.
         </p>
       </header>
 

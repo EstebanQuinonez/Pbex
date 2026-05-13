@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ recommendations });
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Error al llamar a Groq";
+    const message = e instanceof Error ? e.message : "No se pudieron generar las sugerencias.";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }

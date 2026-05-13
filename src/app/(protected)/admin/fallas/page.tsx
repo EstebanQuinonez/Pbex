@@ -24,8 +24,7 @@ export default async function AdminFallasPage() {
           Reportes de fallas de máquina
         </h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Eventos <code className="text-xs">DEFECT_RECORDED</code> con tipo de falla del catálogo. Marca si el mantenimiento
-          ya cerró el caso.
+          Listado de reportes registrados desde planta. Marca cuando el mantenimiento haya cerrado la incidencia.
         </p>
       </div>
       <AdminFallasPanel rows={result.rows} />

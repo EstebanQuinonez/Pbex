@@ -104,17 +104,16 @@ export function MermaForm({
       <div>
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Merma</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Elige la <strong>producción de referencia</strong>. Puedes añadir <strong>varias líneas</strong> en un solo
-          envío (por ejemplo 50 u. de un defecto y 40 u. de otro). Producto, turno y máquina vienen del evento de
-          producción; aquí solo indicas <strong>tipo de defecto</strong> y <strong>cantidad</strong> por línea.
+          Elige la <strong>producción de referencia</strong>. Puedes enviar <strong>varias líneas</strong> en un solo registro
+          (por ejemplo distintas cantidades por tipo de defecto). Producto, turno y máquina se toman de esa producción; aquí
+          solo indicas <strong>tipo de defecto</strong> y <strong>cantidad</strong> por línea.
         </p>
       </div>
 
       {listaProduccion.length === 0 ? (
         <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-          No hay producciones recientes con cantidad bruta. Registra primero una producción. Si ya la registraste y sigues
-          viendo este mensaje, aplica la migración <code className="text-xs">007_merma_produccion_ref.sql</code> y recarga
-          la página.
+          No hay producciones recientes disponibles. Registra primero una producción con cantidad mayor a cero. Si ya lo
+          hiciste y este mensaje continúa, contacta a administración de sistemas.
         </p>
       ) : null}
 

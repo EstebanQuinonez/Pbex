@@ -24,9 +24,7 @@ export default async function PedidosPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Pedidos</h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Rol VENTAS o ADMIN. Los eventos de pedido usan columnas <code className="text-xs">pedido_id</code>,{" "}
-          <code className="text-xs">cliente_id</code>, <code className="text-xs">producto_id</code> y{" "}
-          <code className="text-xs">vendedor_id</code>.
+          Alta y seguimiento de pedidos para el equipo comercial autorizado.
         </p>
       </div>
       <PedidosPanel

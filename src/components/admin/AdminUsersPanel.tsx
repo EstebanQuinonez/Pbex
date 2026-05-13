@@ -81,7 +81,7 @@ export function AdminUsersPanel({ users }: { users: AdminUserRow[] }) {
       <section>
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Usuarios</h2>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Cambia el rol en <code className="text-xs">user_metadata.app_role</code> (se guarda al enviar cada fila).
+          Elige el rol y guarda los cambios con el botón de cada fila.
         </p>
         <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
           <table className="w-full min-w-[32rem] text-left text-sm">

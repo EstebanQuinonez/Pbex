@@ -38,7 +38,7 @@ export function AdminFallasPanel({ rows }: { rows: FallaMaquinaReporteRow[] }) {
 
       {rows.length === 0 ? (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          No hay reportes de falla de máquina con catálogo enlazado. Los nuevos registros desde planta aparecerán aquí.
+          Aún no hay reportes registrados desde planta. Cuando el personal documente una falla, aparecerá en esta lista.
         </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
@@ -46,7 +46,7 @@ export function AdminFallasPanel({ rows }: { rows: FallaMaquinaReporteRow[] }) {
             <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60">
               <tr>
                 <th className="px-3 py-2 font-medium text-zinc-700 dark:text-zinc-300">Falla ocurrió</th>
-                <th className="px-3 py-2 font-medium text-zinc-700 dark:text-zinc-300">Alta sistema</th>
+                <th className="px-3 py-2 font-medium text-zinc-700 dark:text-zinc-300">Registrado</th>
                 <th className="px-3 py-2 font-medium text-zinc-700 dark:text-zinc-300">Máquina</th>
                 <th className="px-3 py-2 font-medium text-zinc-700 dark:text-zinc-300">Tipo</th>
                 <th className="px-3 py-2 font-medium text-zinc-700 dark:text-zinc-300">Cantidad</th>
